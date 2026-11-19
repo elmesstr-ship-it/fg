@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
           action: "THEME_ACTIVATED",
           resource: themeKey,
           detailsAr: `تم تفعيل المظهر الكنسي: ${themeKey}`,
-          detailsEn: `Activated liturgical theme: ${themeKey}`,
+          detailsEn: `Activated brand theme: ${themeKey}`,
           ipAddress: "127.0.0.1",
         },
       });

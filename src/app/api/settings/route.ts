@@ -5,17 +5,17 @@ import { logActivity } from "@/server/audit/auditLogger";
 import prisma from "@/server/db/prisma";
 
 const DEFAULT_SETTINGS = {
-  storeNameAr: "سانكتا ماريا للمقتنيات الكنسية الفاخرة",
-  storeNameEn: "Sancta Maria Premium Liturgical Church Supplies",
-  supportEmail: "support@sanctamaria-store.com",
+  storeNameAr: "إف جي كوليكتيف — براند أزياء وستريت وير معاصر",
+  storeNameEn: "FG Collective — Contemporary Luxury Streetwear",
+  supportEmail: "care@fgcollective.store",
   supportPhone: "01000000001",
-  workingHours: "السبت إلى الخميس: 9:00 ص - 9:00 م",
+  workingHours: "السبت إلى الخميس: 10:00 ص - 10:00 م",
   taxPercentage: 14,
-  freeShippingThreshold: 2000,
-  defaultShippingFee: 75,
+  freeShippingThreshold: 1500,
+  defaultShippingFee: 65,
   telegramNotificationsEnabled: true,
-  telegramChannelId: "@sancta_maria_store",
-  orderPrefix: "SM-",
+  telegramChannelId: "@fg_collective",
+  orderPrefix: "FG-",
   maintenanceMode: false,
 };
 

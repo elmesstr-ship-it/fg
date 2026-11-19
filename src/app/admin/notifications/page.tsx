@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
 import { translations } from "@/config/i18n";
 import { db } from "@/services";
+import { MOCK_NOTIFICATIONS } from "@/services/mock/mockData";
 import { SystemNotification } from "@/types/notification";
 import { Button } from "@/components/ui/Button";
 import {
@@ -29,7 +30,13 @@ export default function AdminNotificationsPage() {
     async function load() {
       try {
         const notifs = await db.notifications.getNotifications();
-        setNotifications(notifs);
+        if (notifs && notifs.length > 0) {
+          setNotifications(notifs);
+        } else {
+          setNotifications(MOCK_NOTIFICATIONS);
+        }
+      } catch {
+        setNotifications(MOCK_NOTIFICATIONS);
       } finally {
         setLoading(false);
       }

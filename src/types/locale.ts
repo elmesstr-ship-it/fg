@@ -23,19 +23,35 @@ export interface TranslationDictionary {
     buyNow: string;
     outOfStock: string;
     inStock: string;
+    size: string;
+    color: string;
+    selectSize: string;
+    sizeGuide: string;
+    filterBy: string;
+    sortBy: string;
+    all: string;
   };
   navigation: {
     home: string;
     catalog: string;
     categories: string;
-    icons: string;
-    vestments: string;
-    incenseAndBurners: string;
-    altarSupplies: string;
-    candles: string;
-    booksAndGifts: string;
+    newDrops: string;
+    hoodies: string;
+    tshirts: string;
+    pants: string;
+    outerwear: string;
+    accessories: string;
+    collections: string;
+    lookbook: string;
     aboutUs: string;
     contact: string;
+    // Optional legacy fallback keys to avoid build breaks
+    icons?: string;
+    vestments?: string;
+    incenseAndBurners?: string;
+    altarSupplies?: string;
+    candles?: string;
+    booksAndGifts?: string;
   };
   admin: {
     dashboard: string;

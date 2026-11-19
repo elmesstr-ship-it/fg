@@ -41,272 +41,225 @@ export class ThemeManagerService {
    */
   async ensureBuiltinThemes(): Promise<void> {
     const builtinCount = await prisma.theme.count();
-    if (builtinCount >= 4) return;
+    if (builtinCount >= 3) return;
 
     const defaults = [
       {
         key: "default",
-        nameAr: "المظهر الليتورجي المعتمد (الذهبي الملكي)",
-        nameEn: "Sancta Maria Royal Liturgical (Gold)",
-        descAr: "الألوان الطقسية الرسمية للكنيسة: النبيذي الملوكي والذهب عيار 24",
-        descEn: "Traditional church liturgical colors: Royal Burgundy and 24K Gold",
+        nameAr: "السمة الأحادية الفاخرة (الافتراضية)",
+        nameEn: "FG Monochrome (Default)",
+        descAr: "سمة ستريت وير معاصرة بباليت أحادي مونوكروم ولمسات فضية حادة",
+        descEn: "Contemporary streetwear theme with minimalist monochrome palette and razor silver accents",
         isActive: true,
         isCustom: false,
         priority: 10,
-        bannerMessageAr: "مرحباً بكم في متجر سانكتا ماريا للمقتنيات الكنسية الفاخرة",
-        bannerMessageEn: "Welcome to Sancta Maria Liturgical Church Products",
+        bannerMessageAr: "شحن مجاني لكافة محافظات مصر للطلبات فوق 1,500 ج.م — دروب شتاء 2026 متاح الآن",
+        bannerMessageEn: "Free Shipping Nationwide for Orders Over 1,500 EGP — Winter 2026 Drop Live Now",
         light: {
-          primary: "#781d22",
-          primaryHover: "#5e161a",
+          primary: "#0a0a0a",
+          primaryHover: "#27272a",
           primaryContrast: "#ffffff",
-          accent: "#bfa15f",
-          gold: "#c5a059",
-          goldLight: "#dfc285",
-          goldDark: "#947231",
-          bg: "#fcfbf7",
+          accent: "#52525b",
+          gold: "#71717a",
+          goldLight: "#a1a1aa",
+          goldDark: "#3f3f46",
+          bg: "#fafafa",
           surface: "#ffffff",
-          surfaceElevated: "#f7f5ed",
-          border: "#e8e3d3",
-          text: "#1c1917",
-          textMuted: "#78716c",
+          surfaceElevated: "#f4f4f5",
+          border: "#e4e4e7",
+          text: "#09090b",
+          textMuted: "#71717a",
         },
         dark: {
-          primary: "#99262c",
-          primaryHover: "#b32d34",
-          primaryContrast: "#ffffff",
-          accent: "#dfc285",
-          gold: "#dfc285",
-          goldLight: "#f3e5c8",
-          goldDark: "#b89345",
-          bg: "#0c0a09",
-          surface: "#1c1917",
-          surfaceElevated: "#292524",
-          border: "#44403c",
-          text: "#fafaf9",
-          textMuted: "#a8a29e",
+          primary: "#ffffff",
+          primaryHover: "#f4f4f5",
+          primaryContrast: "#09090b",
+          accent: "#a1a1aa",
+          gold: "#d4d4d8",
+          goldLight: "#e4e4e7",
+          goldDark: "#71717a",
+          bg: "#09090b",
+          surface: "#121214",
+          surfaceElevated: "#18181b",
+          border: "#27272a",
+          text: "#fafafa",
+          textMuted: "#a1a1aa",
         },
       },
       {
-        key: "christmas",
-        nameAr: "مظهر عيد الميلاد المجيد (الأحمر والذهبي)",
-        nameEn: "Holy Nativity / Christmas Theme",
-        descAr: "الأحمر القرمزي الملوكي والذهب والزمرد احتفاءً بميلاد مخلصنا",
-        descEn: "Festive crimson and gold celebrating the Holy Nativity",
+        key: "summer",
+        nameAr: "إصدار الصيف البحري",
+        nameEn: "Summer Coast Drop",
+        descAr: "أزرق المحيط وألوان منعشة للأطقم الخفيفة",
+        descEn: "Ocean azure and refreshing breezes for lightweight summer drops",
         isActive: false,
         isCustom: false,
         priority: 50,
-        bannerMessageAr: "المجد لله في الأعالي وعلى الأرض السلام وفي الناس المسرة - احتفالات عيد الميلاد",
-        bannerMessageEn: "Glory to God in the highest, and on earth peace - Holy Nativity Season",
+        bannerMessageAr: "انطلاق كوليكشن صيف 2026 — أقمشة قطنية خفيفة ومسامية للحرارة العالية",
+        bannerMessageEn: "Summer 2026 Drop is Live — Breathable Lightweight Fabrics",
         light: {
-          primary: "#8B0000",
-          primaryHover: "#660000",
+          primary: "#0284c7",
+          primaryHover: "#0369a1",
           primaryContrast: "#ffffff",
-          accent: "#228B22",
-          gold: "#D4AF37",
-          goldLight: "#F0E68C",
-          goldDark: "#B8860B",
-          bg: "#FFFDF9",
-          surface: "#FFFFFF",
-          surfaceElevated: "#FBF5EE",
-          border: "#EADBCE",
-          text: "#2B1B17",
-          textMuted: "#7A6855",
+          accent: "#38bdf8",
+          gold: "#38bdf8",
+          goldLight: "#7dd3fc",
+          goldDark: "#0284c7",
+          bg: "#f8fafc",
+          surface: "#ffffff",
+          surfaceElevated: "#f1f5f9",
+          border: "#e2e8f0",
+          text: "#0f172a",
+          textMuted: "#64748b",
         },
         dark: {
-          primary: "#A30000",
-          primaryHover: "#C40000",
-          primaryContrast: "#ffffff",
-          accent: "#2E8B57",
-          gold: "#FFD700",
-          goldLight: "#FFE066",
-          goldDark: "#CCAA00",
-          bg: "#0D0505",
-          surface: "#1C0D0D",
-          surfaceElevated: "#2C1717",
-          border: "#4A2626",
-          text: "#FFF8F0",
-          textMuted: "#B89F9F",
+          primary: "#38bdf8",
+          primaryHover: "#7dd3fc",
+          primaryContrast: "#0f172a",
+          accent: "#7dd3fc",
+          gold: "#38bdf8",
+          goldLight: "#bae6fd",
+          goldDark: "#0284c7",
+          bg: "#070c18",
+          surface: "#0b132b",
+          surfaceElevated: "#111f42",
+          border: "#1e293b",
+          text: "#f8fafc",
+          textMuted: "#94a3b8",
         },
       },
       {
-        key: "easter",
-        nameAr: "مظهر القيامة المجيدة (الأبيض والذهب الملكي)",
-        nameEn: "Holy Resurrection / Easter Theme",
-        descAr: "البياض النوراني والنقاء الفصحي لبهجة قيامة السيد المسيح",
-        descEn: "Luminous white and radiant gold for the Glorious Resurrection",
+        key: "winter",
+        nameAr: "دروب الشتاء الثقيل",
+        nameEn: "Winter Heavyweight",
+        descAr: "خامات ثقيلة دافئة مع درجات الفحم الحجري والأوبسيديان",
+        descEn: "Heavyweight warm terry drops in deep charcoal and obsidian tones",
         isActive: false,
         isCustom: false,
         priority: 50,
-        bannerMessageAr: "إخرستوس آنيستي.. آليثوس آنيستي! المسيح قام.. بالحقيقة قام!",
-        bannerMessageEn: "Christ is Risen! Truly He is Risen! Holy Pascha Season",
+        bannerMessageAr: "هوديز فرنش تيري 380 GSM وجواكت عازلة متوفرة الآن",
+        bannerMessageEn: "380 GSM Heavy French Terry & Insulated Bombers Now Live",
         light: {
-          primary: "#B8860B",
-          primaryHover: "#996515",
+          primary: "#18181b",
+          primaryHover: "#27272a",
           primaryContrast: "#ffffff",
-          accent: "#4B0082",
-          gold: "#DAA520",
-          goldLight: "#F5DEB3",
-          goldDark: "#8B6508",
-          bg: "#FFFFFA",
-          surface: "#FFFFFF",
-          surfaceElevated: "#F8F7EE",
-          border: "#E8E4CF",
-          text: "#1F1D16",
-          textMuted: "#736E5C",
+          accent: "#3f3f46",
+          gold: "#71717a",
+          goldLight: "#a1a1aa",
+          goldDark: "#27272a",
+          bg: "#f4f4f5",
+          surface: "#ffffff",
+          surfaceElevated: "#e4e4e7",
+          border: "#d4d4d8",
+          text: "#18181b",
+          textMuted: "#52525b",
         },
         dark: {
-          primary: "#DAA520",
-          primaryHover: "#FFD700",
-          primaryContrast: "#000000",
-          accent: "#8A2BE2",
-          gold: "#FFE4B5",
-          goldLight: "#FFF8DC",
-          goldDark: "#CD9B1D",
-          bg: "#0B0A06",
-          surface: "#18160E",
-          surfaceElevated: "#252217",
-          border: "#423D2B",
-          text: "#FFFFF5",
-          textMuted: "#A8A391",
-        },
-      },
-      {
-        key: "halloween",
-        nameAr: "مظهر الخريف واليقطين (برتقالي وأرجواني)",
-        nameEn: "Autumn / Harvest Theme",
-        descAr: "الألوان الخريفية الدافئة ولمسات اليقطين الطقسي",
-        descEn: "Warm autumn harvest shades and festive seasonal accents",
-        isActive: false,
-        isCustom: false,
-        priority: 30,
-        bannerMessageAr: "موسم حصاد الخيرات والبركات الخريفية",
-        bannerMessageEn: "Autumn Harvest & Blessings Season",
-        light: {
-          primary: "#D35400",
-          primaryHover: "#A04000",
-          primaryContrast: "#ffffff",
-          accent: "#6C3483",
-          gold: "#F39C12",
-          goldLight: "#F8C471",
-          goldDark: "#B9770E",
-          bg: "#FEF9E7",
-          surface: "#FFFFFF",
-          surfaceElevated: "#FCF3CF",
-          border: "#F5CBA7",
-          text: "#2C3E50",
-          textMuted: "#7F8C8D",
-        },
-        dark: {
-          primary: "#E67E22",
-          primaryHover: "#F39C12",
-          primaryContrast: "#000000",
-          accent: "#9B59B6",
-          gold: "#F1C40F",
-          goldLight: "#F7DC6F",
-          goldDark: "#D4AC0D",
-          bg: "#100904",
-          surface: "#1E1208",
-          surfaceElevated: "#2D1C0F",
-          border: "#4E321D",
-          text: "#FDFEFE",
-          textMuted: "#BDC3C7",
+          primary: "#e4e4e7",
+          primaryHover: "#f4f4f5",
+          primaryContrast: "#18181b",
+          accent: "#a1a1aa",
+          gold: "#71717a",
+          goldLight: "#a1a1aa",
+          goldDark: "#3f3f46",
+          bg: "#09090b",
+          surface: "#141416",
+          surfaceElevated: "#1c1c1f",
+          border: "#27272a",
+          text: "#f4f4f5",
+          textMuted: "#a1a1aa",
         },
       },
     ];
 
-    for (const d of defaults) {
+    for (const def of defaults) {
       await prisma.theme.upsert({
-        where: { key: d.key },
+        where: { key: def.key },
         update: {},
         create: {
-          key: d.key,
-          nameAr: d.nameAr,
-          nameEn: d.nameEn,
-          descAr: d.descAr,
-          descEn: d.descEn,
-          isActive: d.isActive,
-          isCustom: d.isCustom,
-          priority: d.priority,
-          bannerMessageAr: d.bannerMessageAr,
-          bannerMessageEn: d.bannerMessageEn,
-          lightColorsJson: JSON.stringify(d.light),
-          darkColorsJson: JSON.stringify(d.dark),
+          key: def.key,
+          nameAr: def.nameAr,
+          nameEn: def.nameEn,
+          descAr: def.descAr,
+          descEn: def.descEn,
+          isActive: def.isActive,
+          isCustom: def.isCustom,
+          priority: def.priority,
+          bannerMessageAr: def.bannerMessageAr,
+          bannerMessageEn: def.bannerMessageEn,
+          lightColorsJson: JSON.stringify(def.light),
+          darkColorsJson: JSON.stringify(def.dark),
         },
       });
     }
   }
 
   /**
-   * Evaluate schedules and determine which theme should be active right now (or at simulated date).
-   * Checks: Start Date <= Target Date <= End Date.
-   * Resolves conflicts using Theme Priority (Higher number wins).
-   * Automatically expires finished schedules and activates the winning theme.
+   * Evaluate active theme based on schedules or fallback to manual
    */
-  async evaluateActiveTheme(simulatedDate?: Date): Promise<{
-    activeThemeKey: string;
-    reason: string;
-    matchedScheduleId?: string;
-  }> {
+  async evaluateActiveTheme(dateOverride?: Date): Promise<{ activeThemeKey: string; reason: string }> {
     await this.ensureBuiltinThemes();
-    const now = simulatedDate || new Date();
 
-    // 1. Find all schedules that match the target date
+    const now = dateOverride || new Date();
+
+    // Check active schedules
     const activeSchedules = await prisma.themeSchedule.findMany({
       where: {
         startDate: { lte: now },
         endDate: { gte: now },
-      },
-      include: { theme: true },
-    });
-
-    // 2. Mark expired schedules that ended before now and check if any expired schedule had autoRevert
-    const expiredSchedules = await prisma.themeSchedule.findMany({
-      where: {
-        endDate: { lt: now },
         status: { in: ["scheduled", "active"] },
       },
+      include: {
+        theme: true,
+      },
+      orderBy: {
+        theme: {
+          priority: "desc",
+        },
+      },
     });
 
-    if (expiredSchedules.length > 0) {
-      await prisma.themeSchedule.updateMany({
-        where: {
-          id: { in: expiredSchedules.map((s) => s.id) },
-        },
-        data: { status: "expired" },
-      });
-    }
-
     if (activeSchedules.length > 0) {
-      // Sort by Theme Priority descending, then startDate descending
-      activeSchedules.sort((a, b) => {
-        const pDiff = (b.theme.priority || 0) - (a.theme.priority || 0);
-        if (pDiff !== 0) return pDiff;
-        return b.startDate.getTime() - a.startDate.getTime();
-      });
+      const topSchedule = activeSchedules[0];
 
-      const winningSchedule = activeSchedules[0];
-
-      // Mark winning schedule as active, and all other overlapping as scheduled
-      await prisma.$transaction([
-        prisma.themeSchedule.update({
-          where: { id: winningSchedule.id },
+      // Update schedule status to active if not already
+      if (topSchedule.status !== "active") {
+        await prisma.themeSchedule.update({
+          where: { id: topSchedule.id },
           data: { status: "active" },
-        }),
+        });
+      }
+
+      // Mark this theme active, and others inactive
+      await prisma.$transaction([
         prisma.theme.updateMany({ data: { isActive: false } }),
         prisma.theme.update({
-          where: { id: winningSchedule.themeId },
+          where: { id: topSchedule.themeId },
           data: { isActive: true },
         }),
       ]);
 
       return {
-        activeThemeKey: winningSchedule.theme.key,
-        reason: `Scheduled activation: "${winningSchedule.theme.nameEn}" (Priority: ${winningSchedule.theme.priority})`,
-        matchedScheduleId: winningSchedule.id,
+        activeThemeKey: topSchedule.theme.key,
+        reason: `Active schedule in effect until ${topSchedule.endDate.toISOString()}`,
       };
     }
 
-    // If no active schedules exist, check if there was an expired schedule with autoRevert
+    // Check expired schedules with autoRevert
+    const expiredSchedules = await prisma.themeSchedule.findMany({
+      where: {
+        endDate: { lt: now },
+        status: "active",
+      },
+    });
+
+    for (const exp of expiredSchedules) {
+      await prisma.themeSchedule.update({
+        where: { id: exp.id },
+        data: { status: "completed" },
+      });
+    }
+
     const hadAutoRevertExpired = expiredSchedules.some((s) => s.autoRevert);
     if (hadAutoRevertExpired) {
       await prisma.$transaction([
@@ -323,7 +276,7 @@ export class ThemeManagerService {
       };
     }
 
-    // If no active schedule and no expired schedule triggered, check manually active
+    // Check manually active
     const manuallyActive = await prisma.theme.findFirst({
       where: { isActive: true },
     });
@@ -344,12 +297,12 @@ export class ThemeManagerService {
 
     return {
       activeThemeKey: "default",
-      reason: "No active schedule; reverted to default royal theme",
+      reason: "No active schedule; reverted to default theme",
     };
   }
 
   /**
-   * Create a new custom theme (Administrators never need to edit source code)
+   * Create a new custom theme
    */
   async createTheme(data: CreateThemeDTO) {
     await this.ensureBuiltinThemes();
@@ -361,36 +314,35 @@ export class ThemeManagerService {
       throw new Error(`Theme with slug "${data.key}" already exists`);
     }
 
-    // Default template colors if partial
     const baseColors = {
-      primary: "#781d22",
-      primaryHover: "#5e161a",
+      primary: "#0a0a0a",
+      primaryHover: "#27272a",
       primaryContrast: "#ffffff",
-      accent: "#bfa15f",
-      gold: "#c5a059",
-      goldLight: "#dfc285",
-      goldDark: "#947231",
-      bg: "#fcfbf7",
+      accent: "#52525b",
+      gold: "#71717a",
+      goldLight: "#a1a1aa",
+      goldDark: "#3f3f46",
+      bg: "#fafafa",
       surface: "#ffffff",
-      surfaceElevated: "#f7f5ed",
-      border: "#e8e3d3",
-      text: "#1c1917",
-      textMuted: "#78716c",
+      surfaceElevated: "#f4f4f5",
+      border: "#e4e4e7",
+      text: "#09090b",
+      textMuted: "#71717a",
     };
 
     const light = { ...baseColors, ...data.lightColors };
     const dark = {
       ...baseColors,
-      bg: "#0c0a09",
-      surface: "#1c1917",
-      surfaceElevated: "#292524",
-      border: "#44403c",
-      text: "#fafaf9",
-      textMuted: "#a8a29e",
+      bg: "#09090b",
+      surface: "#121214",
+      surfaceElevated: "#18181b",
+      border: "#27272a",
+      text: "#fafafa",
+      textMuted: "#a1a1aa",
       ...data.darkColors,
     };
 
-    const created = await prisma.theme.create({
+    return await prisma.theme.create({
       data: {
         key: data.key.trim().toLowerCase(),
         nameAr: data.nameAr.trim(),
@@ -406,8 +358,6 @@ export class ThemeManagerService {
         darkColorsJson: JSON.stringify(dark),
       },
     });
-
-    return created;
   }
 
   /**
@@ -460,7 +410,7 @@ export class ThemeManagerService {
       throw new Error("End date must be after start date");
     }
 
-    const schedule = await prisma.themeSchedule.create({
+    return await prisma.themeSchedule.create({
       data: {
         themeId: theme.id,
         startDate: start,
@@ -469,8 +419,6 @@ export class ThemeManagerService {
         status: "scheduled",
       },
     });
-
-    return schedule;
   }
 }
 

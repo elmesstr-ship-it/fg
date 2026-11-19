@@ -3,7 +3,7 @@
  * Provides authenticated communication with the backend administration endpoints.
  */
 
-export const ADMIN_MASTER_KEY = "SanctaMariaMasterKey#2026";
+export const ADMIN_MASTER_KEY = "FGCollectiveMasterKey#2026";
 
 export async function adminFetch<T = any>(
   endpoint: string,

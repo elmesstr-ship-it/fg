@@ -16,7 +16,7 @@ export interface Customer {
   email: string;
   phone: string;
   avatarUrl?: string;
-  parishName?: string; // Church / Diocese affiliation
+  parishName?: string; // Brand club tier or membership status
   role: "USER" | "ADMIN";
   createdAt: string;
   totalOrdersCount: number;

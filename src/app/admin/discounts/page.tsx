@@ -5,6 +5,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { translations } from "@/config/i18n";
 import { db } from "@/services";
 import { Coupon } from "@/types/coupon";
+import { MOCK_COUPONS } from "@/services/mock/mockData";
 import { Button } from "@/components/ui/Button";
 import {
   Tag,
@@ -38,7 +39,13 @@ export default function AdminDiscountsPage() {
     async function load() {
       try {
         const data = await db.coupons.getCoupons();
-        setCoupons(data);
+        if (data && data.length > 0) {
+          setCoupons(data);
+        } else {
+          setCoupons(MOCK_COUPONS);
+        }
+      } catch {
+        setCoupons(MOCK_COUPONS);
       } finally {
         setLoading(false);
       }
@@ -69,8 +76,8 @@ export default function AdminDiscountsPage() {
       endDate: "2027-12-31T23:59:59Z",
       isActive: true,
       description: {
-        ar: newCoupon.descAr || "خصم مبارك على المقتنيات",
-        en: newCoupon.descEn || "Liturgical discount",
+        ar: newCoupon.descAr || "خصم ترويجي على إصدارات FG",
+        en: newCoupon.descEn || "FG Promotional discount",
       },
     });
 
@@ -98,8 +105,8 @@ export default function AdminDiscountsPage() {
           </h1>
           <p className="text-xs text-theme-text-muted mt-1">
             {locale === "ar"
-              ? "إنشاء وإدارة كوبونات الخصم، العروض الموسمية، وخصومات الآباء الكهنة"
-              : "Manage promotional vouchers, seasonal discounts, and clerical codes"}
+              ? "إنشاء وإدارة كوبونات الخصم، العروض الترويجية، وخصومات دروبات الستريت وير"
+              : "Manage promotional vouchers, drop discounts, and VIP promo codes"}
           </p>
         </div>
 

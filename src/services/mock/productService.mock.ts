@@ -5,7 +5,9 @@ import { MOCK_CATEGORIES, MOCK_PRODUCTS, MOCK_REVIEWS } from "./mockData";
 export class MockProductService implements IProductService {
   private products: Product[] = [...MOCK_PRODUCTS];
   private categories: Category[] = [...MOCK_CATEGORIES];
-  private reviews: Record<string, ProductReview[]> = { ...MOCK_REVIEWS };
+  private reviews: Record<string, ProductReview[]> = {
+    "prod-fg-hoodie-01": [...(MOCK_REVIEWS || [])],
+  };
 
   async getProducts(params?: {
     category?: string;

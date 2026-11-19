@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
+import { MOCK_CATEGORIES, MOCK_PRODUCTS } from "../src/lib/fashionMockData";
 
 const prisma = new PrismaClient();
 
@@ -8,18 +9,48 @@ function hashPassword(password: string, salt: string) {
 }
 
 async function main() {
-  console.log("🌱 Starting Church Products Database Seeding...");
+  console.log("🌱 Starting FG Collective Fashion Database Seeding...");
 
-  // 1. Seed Users & Profiles
-  console.log("Seeding Users & Profiles...");
+  // Clean existing tables in proper relation order
+  console.log("Cleaning old database records...");
+  const delegates = [
+    prisma.orderItem,
+    prisma.order,
+    prisma.cartItem,
+    prisma.cart,
+    prisma.wishlistItem,
+    prisma.review,
+    prisma.inventory,
+    prisma.productVariant,
+    prisma.productImage,
+    prisma.productAlert,
+    prisma.product,
+    prisma.category,
+    prisma.coupon,
+    prisma.notification,
+    prisma.themeSchedule,
+    prisma.theme,
+    prisma.address,
+    prisma.profile,
+    prisma.user,
+  ];
+
+  for (const model of delegates) {
+    if (model && typeof (model as any).deleteMany === "function") {
+      await (model as any).deleteMany().catch((err: any) => console.log("Skip clean:", err.message));
+    }
+  }
+
+  // 1. Seed Users & Profiles (Demo Customer & Demo Admin)
+  console.log("Seeding Demo Users...");
+  
+  // Demo Customer: demo.user@example.com / DemoUser123!
   const custSalt = crypto.randomBytes(16).toString("hex");
-  const custHash = hashPassword("Customer@1234", custSalt);
+  const custHash = hashPassword("DemoUser123!", custSalt);
 
-  const customerUser = await prisma.user.upsert({
-    where: { email: "mina.girgis@example.com" },
-    update: {},
-    create: {
-      email: "mina.girgis@example.com",
+  const customerUser = await prisma.user.create({
+    data: {
+      email: "demo.user@example.com",
       passwordHash: custHash,
       salt: custSalt,
       phone: "01201234567",
@@ -28,32 +59,31 @@ async function main() {
       isPhoneVerified: true,
       profile: {
         create: {
-          fullName: "مينا رفيق جرجس",
-          parishName: "كنيسة السيدة العذراء مريم - المعادي",
+          fullName: "عمر الشريف",
+          parishName: "FG Collective Club Member",
         },
       },
       addresses: {
         create: {
           title: "المنزل",
-          fullName: "مينا رفيق جرجس",
+          fullName: "عمر الشريف",
           phone: "01201234567",
           governorate: "القاهرة",
-          city: "المعادي",
-          streetAddress: "شارع النصر، عمارة 14، الدور الثالث",
+          city: "الزمالك",
+          streetAddress: "شارع 26 يوليو، مبنى 12، الدور الرابع",
           isDefault: true,
         },
       },
     },
   });
 
+  // Demo Admin: demo.admin@example.com / DemoAdmin123!
   const adminSalt = crypto.randomBytes(16).toString("hex");
-  const adminHash = hashPassword("Admin@Holy2026", adminSalt);
+  const adminHash = hashPassword("DemoAdmin123!", adminSalt);
 
-  const adminUser = await prisma.user.upsert({
-    where: { email: "admin@sanctamaria-store.com" },
-    update: {},
-    create: {
-      email: "admin@sanctamaria-store.com",
+  await prisma.user.create({
+    data: {
+      email: "demo.admin@example.com",
       passwordHash: adminHash,
       salt: adminSalt,
       phone: "01000000001",
@@ -62,224 +92,168 @@ async function main() {
       isPhoneVerified: true,
       profile: {
         create: {
-          fullName: "مشرف النظام الإداري (رئيسي)",
-          parishName: "المقر الإداري - سانكتا ماريا",
+          fullName: "إدارة إف جي كوليكتيف",
+          parishName: "FG Headquarters",
         },
       },
     },
   });
 
   // 2. Seed Categories
-  console.log("Seeding Categories...");
-  const catIcons = await prisma.category.upsert({
-    where: { slug: "sacred-icons" },
-    update: {},
-    create: {
-      slug: "sacred-icons",
-      nameAr: "أيقونات قبطية وبيزنطية مقدسة",
-      nameEn: "Sacred Coptic & Byzantine Icons",
-      descAr: "أيقونات أثرية مرسومة يدوياً ومطلية بماء الذهب عيار 24 طبقاً للطقس الكنسي الأصيل",
-      descEn: "Hand-painted 24k gold leaf Byzantine and Coptic icons created with traditional monastic techniques",
-      image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=800&auto=format&fit=crop",
-      itemCount: 24,
-    },
-  });
+  console.log("Seeding FG Fashion Categories...");
+  const categoryMap = new Map<string, string>();
 
-  const catCensers = await prisma.category.upsert({
-    where: { slug: "altar-vessels-censers" },
-    update: {},
-    create: {
-      slug: "altar-vessels-censers",
-      nameAr: "أواني المذبح والمجامر الطقسية",
-      nameEn: "Altar Vessels & Handcrafted Censers",
-      descAr: "كؤوس وصواني طقسية ومجامر نحاسية مذهبة وفضية محفورة بصلبان ورموز الآباء",
-      descEn: "Chalice and paten sets, silver and gold plated brass censers with liturgical harmonic bells",
-      image: "https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=800&auto=format&fit=crop",
-      itemCount: 18,
-    },
-  });
-
-  const catIncense = await prisma.category.upsert({
-    where: { slug: "pure-incense-candles" },
-    update: {},
-    create: {
-      slug: "pure-incense-candles",
-      nameAr: "بخور ديري أصيل وشموع نقية",
-      nameEn: "Monastery Incense & Pure Candles",
-      descAr: "أفخر أنواع بخور جبل آثوس والأديرة المصرية وشموع شمع عسل النحل الطبيعي 100% غير المدخنة",
-      descEn: "Mount Athos aromatic incense, Egyptian monastic blends, and pure beeswax taper candles",
-      image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?q=80&w=800&auto=format&fit=crop",
-      itemCount: 32,
-    },
-  });
-
-  // 3. Seed Products & Inventory
-  console.log("Seeding Products & Inventory...");
-  const prod1 = await prisma.product.upsert({
-    where: { slug: "byzantine-christ-pantocrator-icon" },
-    update: {},
-    create: {
-      slug: "byzantine-christ-pantocrator-icon",
-      nameAr: "أيقونة السيد المسيح ضابط الكل (بانطوقراطور)",
-      nameEn: "Christ Pantocrator Gold Leaf Icon",
-      shortDescAr: "أيقونة خشبية أثرية مذهبة عيار 24 يدوية الصنع بألوان طبيعية ثابتة",
-      shortDescEn: "Handcrafted 24k gold leaf egg tempera wood icon on solid aged linden wood",
-      fullDescAr: "أيقونة طقسية مقدسة تجسد السيد المسيح ضابط الكل وفقاً للفن البيزنطي والقبطي العريق.",
-      fullDescEn: "A solemn, sacred depiction of Christ Pantocrator adhering to venerable Coptic and Byzantine iconography.",
-      categoryId: catIcons.id,
-      price: 3200,
-      originalPrice: 3800,
-      discountPercentage: 15,
-      stock: 7,
-      sku: "ICON-PANT-01",
-      isFeatured: true,
-      isBestSeller: true,
-      rating: 4.9,
-      reviewCount: 38,
-      specificationsJson: JSON.stringify({
-        dimensions: { ar: "30 × 40 سم", en: "30 x 40 cm" },
-        material: { ar: "خشب زان طبيعي مذهب", en: "Aged solid wood with 24k gold leaf" },
-      }),
-      images: {
-        create: [
-          {
-            url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1000&auto=format&fit=crop",
-            isPrimary: true,
-            order: 0,
-          },
-        ],
+  for (const cat of MOCK_CATEGORIES) {
+    const createdCat = await prisma.category.create({
+      data: {
+        slug: cat.slug,
+        nameAr: cat.name.ar,
+        nameEn: cat.name.en,
+        descAr: cat.description.ar,
+        descEn: cat.description.en,
+        image: cat.heroImage,
+        itemCount: cat.itemCount,
       },
-      inventoryItem: {
-        create: {
-          sku: "ICON-PANT-01",
-          currentStock: 7,
-          lowStockThreshold: 10,
-          safetyStock: 3,
-          unitCost: 2200,
-          sellingPrice: 3200,
-          status: "low_stock",
-          lastUpdatedSource: "admin_dashboard",
+    });
+    categoryMap.set(cat.id, createdCat.id);
+  }
+
+  // 3. Seed Products, Images, Variants & Inventory
+  console.log("Seeding FG Fashion Products...");
+  const createdProducts: any[] = [];
+
+  for (const prod of MOCK_PRODUCTS) {
+    const dbCategoryId = categoryMap.get(prod.category.id) || Array.from(categoryMap.values())[0];
+
+    const createdProduct = await prisma.product.create({
+      data: {
+        slug: prod.slug,
+        nameAr: prod.name.ar,
+        nameEn: prod.name.en,
+        shortDescAr: prod.tagline.ar,
+        shortDescEn: prod.tagline.en,
+        fullDescAr: prod.description.ar,
+        fullDescEn: prod.description.en,
+        categoryId: dbCategoryId,
+        price: prod.price,
+        originalPrice: prod.originalPrice || null,
+        discountPercentage: prod.discountPercentage || null,
+        stock: prod.stock,
+        sku: prod.sku,
+        isFeatured: prod.isFeatured || false,
+        isBestSeller: prod.isBestSeller || false,
+        rating: prod.rating,
+        reviewCount: prod.reviewCount,
+        specificationsJson: JSON.stringify({
+          gsm: prod.fashionDetails.gsm,
+          fabric: prod.fashionDetails.fabric,
+          fit: prod.fashionDetails.fit,
+          care: prod.fashionDetails.care,
+          origin: prod.fashionDetails.origin,
+          availableSizes: prod.sizes,
+          availableColors: prod.colors,
+        }),
+        images: {
+          create: prod.images.map((url, idx) => ({
+            url,
+            isPrimary: idx === 0,
+            order: idx,
+          })),
+        },
+        variants: {
+          create: prod.sizes.map((sz, idx) => ({
+            sku: `${prod.sku}-${sz}`,
+            nameAr: `المقاس: ${sz}`,
+            nameEn: `Size: ${sz}`,
+            price: prod.price,
+            stock: Math.floor(prod.stock / prod.sizes.length) + (idx === 0 ? prod.stock % prod.sizes.length : 0),
+          })),
+        },
+        inventoryItem: {
+          create: {
+            sku: prod.sku,
+            currentStock: prod.stock,
+            lowStockThreshold: 10,
+            safetyStock: 5,
+            sellingPrice: prod.price,
+            status: "IN_STOCK",
+          },
         },
       },
-    },
-  });
+    });
 
-  const prod2 = await prisma.product.upsert({
-    where: { slug: "ornate-byzantine-liturgical-censer" },
-    update: {},
-    create: {
-      slug: "ornate-byzantine-liturgical-censer",
-      nameAr: "شورية (مجمرة) طقسية نحاسية مذهبة بأجراس نغمية",
-      nameEn: "Imperial Ornate Liturgical Brass Censer",
-      shortDescAr: "مجمرة مذبح كنسية نحاسية ثقيلة مع 12 جرس منغم وسلاسل فولاذية صلبة",
-      shortDescEn: "Heavy gold-plated brass thurible adorned with 12 harmonic bells and cross finial",
-      fullDescAr: "مجمرة كنسية (شورية) فاخرة مصنوعة من النحاس الخالص المطلي بالذهب غير القابل للتغير.",
-      fullDescEn: "An exquisite liturgical thurible forged from high-purity brass and electroplated with enduring gold luster.",
-      categoryId: catCensers.id,
-      price: 2450,
-      originalPrice: 2800,
-      discountPercentage: 12,
-      stock: 14,
-      sku: "ALTR-CENS-02",
-      isFeatured: true,
-      isBestSeller: false,
-      rating: 4.8,
-      reviewCount: 22,
-      specificationsJson: JSON.stringify({
-        dimensions: { ar: "ارتفاع 26 سم - سلاسل 70 سم", en: "Height 26 cm - Chains 70 cm" },
-        material: { ar: "نحاس صلب مذهب عالي النقاوة", en: "Pure Gold-Plated Solid Brass" },
-      }),
-      images: {
-        create: [
-          {
-            url: "https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1000&auto=format&fit=crop",
-            isPrimary: true,
-            order: 0,
-          },
-        ],
-      },
-      inventoryItem: {
-        create: {
-          sku: "ALTR-CENS-02",
-          currentStock: 14,
-          lowStockThreshold: 8,
-          safetyStock: 2,
-          unitCost: 1700,
-          sellingPrice: 2450,
-          status: "in_stock",
-          lastUpdatedSource: "telegram_bot",
-        },
-      },
-    },
-  });
+    createdProducts.push(createdProduct);
+  }
 
   // 4. Seed Coupons
   console.log("Seeding Coupons...");
-  await prisma.coupon.upsert({
-    where: { code: "SANCTA10" },
-    update: {},
-    create: {
-      code: "SANCTA10",
+  await prisma.coupon.create({
+    data: {
+      code: "FG10",
       discountType: "percentage",
       discountValue: 10,
-      minOrderAmount: 500,
+      minOrderAmount: 1000,
       maxDiscountAmount: 300,
       endDate: new Date("2027-12-31T23:59:59Z"),
       isActive: true,
       usageCount: 142,
-      descAr: "خصم ترحيبي 10% لجميع المقتنيات الكنسية",
-      descEn: "10% Welcome discount on all liturgical supplies",
+      descAr: "خصم ترحيبي 10% لعملاء إف جي كوليكتيف",
+      descEn: "10% Welcome discount for FG Collective members",
     },
   });
 
-  await prisma.coupon.upsert({
-    where: { code: "NATIVITY20" },
-    update: {},
-    create: {
-      code: "NATIVITY20",
+  await prisma.coupon.create({
+    data: {
+      code: "VIP20",
       discountType: "percentage",
       discountValue: 20,
       minOrderAmount: 2000,
-      maxDiscountAmount: 600,
-      endDate: new Date("2027-01-10T23:59:59Z"),
+      maxDiscountAmount: 800,
+      endDate: new Date("2027-12-31T23:59:59Z"),
       isActive: true,
-      usageCount: 88,
-      descAr: "خصم موسم صوم وعيد الميلاد المجيد 20%",
-      descEn: "20% Holy Nativity feast season blessing",
+      usageCount: 65,
+      descAr: "خصم حصري 20% لكبار عملاء إف جي",
+      descEn: "Exclusive 20% discount for VIP members",
     },
   });
 
   // 5. Seed Orders
-  console.log("Seeding Orders...");
-  await prisma.order.upsert({
-    where: { orderNumber: "SM-829104" },
-    update: {},
-    create: {
-      orderNumber: "SM-829104",
+  console.log("Seeding Demo Orders...");
+  const firstProd = createdProducts[0];
+  const secondProd = createdProducts[1] || firstProd;
+
+  await prisma.order.create({
+    data: {
+      orderNumber: "FG-90214",
       userId: customerUser.id,
-      customerName: "مينا رفيق جرجس",
-      customerEmail: "mina.girgis@example.com",
+      customerName: "عمر الشريف",
+      customerEmail: "demo.user@example.com",
       customerPhone: "01201234567",
       governorate: "القاهرة",
-      city: "المعادي",
-      streetAddress: "شارع النصر، عمارة 14، الدور الثالث",
-      notes: "تسليم هادئ ومؤمّن للأيقونة",
-      subtotal: 3200,
+      city: "الزمالك",
+      streetAddress: "شارع 26 يوليو، مبنى 12، الدور الرابع",
+      notes: "التوصيل بعد الساعة 4 مساءً",
+      subtotal: 3100,
       shippingFee: 0,
-      discountAmount: 0,
-      total: 3200,
+      discountAmount: 310,
+      total: 2790,
       paymentMethod: "cash_on_delivery",
-      paymentStatus: "pending",
-      orderStatus: "processing",
-      trackingNumber: "EGY-EXP-992144",
-      shippingProvider: "Bosta Logistics",
+      paymentStatus: "paid",
+      orderStatus: "delivered",
       items: {
         create: [
           {
-            productId: prod1.id,
-            productName: "أيقونة السيد المسيح ضابط الكل (بانطوقراطور)",
-            productImage: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600",
-            price: 3200,
+            productId: firstProd.id,
+            productName: firstProd.nameAr,
+            productImage: MOCK_PRODUCTS[0]?.images[0] || "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=800",
+            price: firstProd.price,
+            quantity: 1,
+          },
+          {
+            productId: secondProd.id,
+            productName: secondProd.nameAr,
+            productImage: MOCK_PRODUCTS[1]?.images[0] || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=800",
+            price: secondProd.price,
             quantity: 1,
           },
         ],
@@ -293,60 +267,46 @@ async function main() {
     data: {
       type: "new_order",
       priority: "high",
-      titleAr: "طلب جديد وارد: SM-829104",
-      titleEn: "New Order: SM-829104",
-      messageAr: "قام العميل مينا رفيق بطلب أيقونة السيد المسيح ضابط الكل بمبلغ 3,200 ج.م.",
-      messageEn: "Mina Girgis placed an order for Christ Pantocrator Icon (3,200 EGP).",
-      resourceId: "SM-829104",
+      titleAr: "طلب جديد: FG-90214",
+      titleEn: "New Order: FG-90214",
+      messageAr: "قام العميل عمر الشريف بطلب منتجات إف جي بقيمة 2,790 ج.م.",
+      messageEn: "Omar El Sherif placed an order for FG items (2,790 EGP).",
+      resourceId: "FG-90214",
       resourceType: "order",
       actionUrl: "/admin/orders",
       isRead: false,
     },
   });
 
-  // 7. Seed Themes
-  console.log("Seeding Themes & Schedules...");
-  await prisma.theme.upsert({
-    where: { key: "default" },
-    update: {},
-    create: {
+  // 7. Seed Themes (Strictly Fashion Themes - Zero Halloween)
+  console.log("Seeding Themes...");
+  await prisma.theme.create({
+    data: {
       key: "default",
-      nameAr: "السمة الكنسية الملكية (الافتراضية)",
-      nameEn: "Royal Liturgical (Default)",
-      descAr: "سمة كنسية فاخرة بلمسات العنابي الداكن والذهب الروماني",
-      descEn: "Luxurious ecclesiastical theme with deep burgundy and Roman gold accents",
+      nameAr: "السمة الأحادية الفاخرة (الافتراضية)",
+      nameEn: "FG Monochrome (Default)",
+      descAr: "سمة ستريت وير معاصرة بباليت أحادي مونوكروم ولمسات فضية حادة",
+      descEn: "Contemporary streetwear theme with minimalist monochrome palette and razor silver accents",
       isActive: true,
-      lightColorsJson: JSON.stringify({ primary: "#5A1827", gold: "#C5A059", bg: "#FAF8F5" }),
-      darkColorsJson: JSON.stringify({ primary: "#8B263E", gold: "#D4AF37", bg: "#120F10" }),
+      lightColorsJson: JSON.stringify({ primary: "#0A0A0A", accent: "#52525B", bg: "#FAFAFA" }),
+      darkColorsJson: JSON.stringify({ primary: "#FFFFFF", accent: "#A1A1AA", bg: "#09090B" }),
     },
   });
 
-  await prisma.theme.upsert({
-    where: { key: "christmas" },
-    update: {},
-    create: {
-      key: "christmas",
-      nameAr: "سمة عيد الميلاد المجيد",
-      nameEn: "Holy Nativity & Christmas",
-      descAr: "ألوان ميلادية مقدسة بالأحمر القرمزي والزمردي والأضواء الذهبية",
-      descEn: "Sacred Christmas crimson, forest green, and radiant starlight gold",
+  await prisma.theme.create({
+    data: {
+      key: "summer",
+      nameAr: "إصدار الصيف البحري",
+      nameEn: "Summer Coast Drop",
+      descAr: "أزرق المحيط وألوان منعشة للأطقم الخفيفة",
+      descEn: "Ocean azure and refreshing breezes for lightweight summer drops",
       isActive: false,
-      bannerMessageAr: "المجد لله في الأعالي وعلى الأرض السلام - احتفالات عيد الميلاد المجيد",
-      bannerMessageEn: "Glory to God in the highest, and on earth peace - Holy Christmas Celebration",
-      lightColorsJson: JSON.stringify({ primary: "#851419", gold: "#D4AF37", bg: "#FBF7F5" }),
-      darkColorsJson: JSON.stringify({ primary: "#A31D23", gold: "#E0B738", bg: "#140E0F" }),
-      schedules: {
-        create: {
-          startDate: new Date("2026-11-20T00:00:00Z"),
-          endDate: new Date("2027-01-08T23:59:59Z"),
-          autoRevert: true,
-          status: "scheduled",
-        },
-      },
+      lightColorsJson: JSON.stringify({ primary: "#0284C7", accent: "#38BDF8", bg: "#F8FAFC" }),
+      darkColorsJson: JSON.stringify({ primary: "#38BDF8", accent: "#7DD3FC", bg: "#0B132B" }),
     },
   });
 
-  console.log("✅ Church Products Database Seeded Successfully!");
+  console.log("✅ FG Collective Fashion Database Seeded Successfully!");
 }
 
 main()

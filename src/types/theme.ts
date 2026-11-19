@@ -2,9 +2,12 @@ export type ThemeMode = "light" | "dark";
 
 export type SeasonalThemeId = 
   | "default"
-  | "halloween"
+  | "summer"
+  | "winter"
+  | "ramadan"
+  | "eid_fitr"
+  | "eid_adha"
   | "christmas"
-  | "easter"
   | "promotional"
   | (string & {});
 

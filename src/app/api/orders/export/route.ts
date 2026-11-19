@@ -37,8 +37,6 @@ export async function GET(req: NextRequest) {
       "طريقة الدفع",
       "حالة الدفع",
       "حالة الطلب",
-      "رقم بوليصة الشحن",
-      "شركة الشحن",
     ];
 
     const escapeCsv = (val: any) => {
@@ -83,8 +81,6 @@ export async function GET(req: NextRequest) {
         o.paymentMethod,
         o.paymentStatus,
         o.orderStatus,
-        o.trackingNumber || "—",
-        o.shippingProvider || "Bosta Logistics",
       ];
 
       rows.push(row.map(escapeCsv).join(","));
@@ -110,8 +106,6 @@ export async function GET(req: NextRequest) {
         "",
         "",
         "",
-        "",
-        "",
       ]
         .map(escapeCsv)
         .join(",")
@@ -122,7 +116,7 @@ export async function GET(req: NextRequest) {
 
     const now = new Date();
     const dateStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}`;
-    const filename = `Sancta_Maria_Orders_Report_${dateStr}.csv`;
+    const filename = `FG_Collective_Orders_Report_${dateStr}.csv`;
 
     return new NextResponse(csvContent, {
       status: 200,

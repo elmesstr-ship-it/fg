@@ -62,7 +62,7 @@ export function requireAuth(req: NextRequest): AuthenticatedUser {
   return user;
 }
 
-const MASTER_ADMIN_SECRET = process.env.ADMIN_MASTER_KEY || "SanctaMariaMasterKey#2026";
+const MASTER_ADMIN_SECRET = process.env.ADMIN_MASTER_KEY || "FGCollectiveMasterKey#2026";
 
 export function requireAdmin(req: NextRequest): AuthenticatedUser {
   // 1. Check Master Key Header
@@ -70,12 +70,12 @@ export function requireAdmin(req: NextRequest): AuthenticatedUser {
   if (masterKey && masterKey === MASTER_ADMIN_SECRET) {
     return {
       id: "admin-master-sys",
-      email: "admin@sanctamaria-store.com",
-      fullName: "مشرف النظام الإداري (رئيسي)",
+      email: "demo.admin@example.com",
+      fullName: "إدارة إف جي كوليكتيف",
       role: "ADMIN",
       isEmailVerified: true,
       isPhoneVerified: true,
-      parishName: "المقر الإداري - سانكتا ماريا",
+      parishName: "FG Headquarters",
     };
   }
 

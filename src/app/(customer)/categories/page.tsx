@@ -1,113 +1,71 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { productService } from "@/services/mock/productService.mock";
-import { Category } from "@/types/product";
+import { MOCK_CATEGORIES } from "@/lib/fashionMockData";
 import { useAppStore } from "@/store/useAppStore";
 import { translations } from "@/config/i18n";
-import { ArrowLeft, ArrowRight, Sparkles, FolderTree } from "lucide-react";
+import { ArrowLeft, ArrowRight, Layers, Flame } from "lucide-react";
 
 export default function CategoriesPage() {
   const { locale } = useAppStore();
   const t = translations[locale];
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const cats = await productService.getCategories();
-        setCategories(cats);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       
       {/* Title & Introduction */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-theme-gold/15 text-theme-gold text-xs font-bold border border-theme-gold/30">
-          <FolderTree className="w-3.5 h-3.5" />
-          <span>{locale === "ar" ? "الأقسام والمقتنيات الكنسية" : "Ecclesiastical Departments"}</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-wider font-mono">
+          <Layers className="w-3.5 h-3.5 text-[#D4AF37]" />
+          <span>{locale === "ar" ? "أقسام وتصنيفات FG" : "FG Fashion Departments"}</span>
         </div>
-        <h1 className="font-sacred text-3xl sm:text-4xl font-extrabold text-theme-text">
+        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-neutral-950 dark:text-white">
           {t.navigation.categories}
         </h1>
-        <p className="text-xs sm:text-sm text-theme-text-muted leading-relaxed">
+        <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed font-sans">
           {locale === "ar"
-            ? "تصفح تشكيلتنا المتخصصة والمصنفة بعناية فائقة لتلبية كافة احتياجات الهيكل، المذبح، الصلوات الطقسية، والمنازل المباركة."
-            : "Explore our liturgical departments carefully arranged for parishes, clergy, and sacred homes."}
+            ? "تصفح تشكيلة أزياء الستريت وير المصنفة بعناية: هوديز ثقيلة 380 GSM، تيشرتات بوكسي، بناطيل كارجو تكتيكية، وإكسسوارات حصرية."
+            : "Explore our contemporary streetwear collections: 380 GSM heavyweight hoodies, boxy tees, tactical cargos, and everyday luxury accessories."}
         </p>
       </div>
 
       {/* Categories Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-64 rounded-3xl bg-theme-surface-elevated animate-pulse border border-theme-border" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              className="group relative bg-theme-surface rounded-3xl border border-theme-border overflow-hidden shadow-sm hover:shadow-sacred-lg hover:border-theme-gold transition-all duration-300 flex flex-col sm:flex-row"
-            >
-              {/* Category Image */}
-              <div className="relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto overflow-hidden bg-theme-surface-elevated">
-                <Image
-                  src={cat.image}
-                  alt={cat.name[locale]}
-                  fill
-                  className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent sm:hidden" />
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {MOCK_CATEGORIES.map((cat) => (
+          <Link
+            key={cat.id}
+            href={`/catalog?category=${cat.id}`}
+            className="group relative rounded-3xl overflow-hidden bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-md hover:shadow-2xl transition-all aspect-[4/3] flex flex-col justify-end p-6"
+          >
+            <Image
+              src={cat.heroImage}
+              alt={locale === "ar" ? cat.name.ar : cat.name.en}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-75 group-hover:opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
 
-              {/* Category Details */}
-              <div className="p-6 sm:w-3/5 flex flex-col justify-between space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-theme-gold mb-1">
-                    <span className="uppercase tracking-wider">
-                      {cat.itemCount} {locale === "ar" ? "صنف كنسي متوفر" : "Liturgical Items"}
-                    </span>
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-
-                  <h3 className="font-sacred text-lg font-bold text-theme-text group-hover:text-theme-primary transition-colors">
-                    {cat.name[locale]}
-                  </h3>
-
-                  <p className="text-xs text-theme-text-muted leading-relaxed mt-2">
-                    {cat.description[locale]}
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <Link
-                    href={`/catalog?cat=${cat.slug}`}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-theme-gold hover:text-theme-primary transition-colors group/link"
-                  >
-                    <span>{locale === "ar" ? "تصفح معروضات القسم" : "Browse Department"}</span>
-                    {locale === "ar" ? (
-                      <ArrowLeft className="w-4 h-4 group-hover/link:-translate-x-1 transition-transform" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                    )}
-                  </Link>
-                </div>
+            <div className="relative z-10 space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase text-[#D4AF37] tracking-widest block">
+                {cat.itemCount} {locale === "ar" ? "قطع متوفرة" : "Pieces Available"}
+              </span>
+              <h2 className="text-xl font-black text-white group-hover:text-[#D4AF37] transition-colors">
+                {locale === "ar" ? cat.name.ar : cat.name.en}
+              </h2>
+              <p className="text-xs text-neutral-300 line-clamp-2">
+                {locale === "ar" ? cat.tagline.ar : cat.tagline.en}
+              </p>
+              <div className="pt-2 flex items-center gap-2 text-xs font-bold text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform">
+                <span>{locale === "ar" ? "استكشف التشكيلة" : "Explore Collection"}</span>
+                {locale === "ar" ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </Link>
+        ))}
+      </div>
+
     </div>
   );
 }

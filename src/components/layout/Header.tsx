@@ -360,14 +360,17 @@ export function Header() {
             <Link href="/catalog?cat=sacred-icons" className="hover:text-theme-primary transition-colors">
               {t.navigation.icons}
             </Link>
-            <Link href="/catalog?cat=altar-vessels-censers" className="hover:text-theme-primary transition-colors">
-              {t.navigation.altarSupplies}
+            <Link href="/catalog?category=hoodies-sweats" className="hover:text-theme-primary transition-colors">
+              هوديز
             </Link>
-            <Link href="/catalog?cat=liturgical-vestments" className="hover:text-theme-primary transition-colors">
-              {t.navigation.vestments}
+            <Link href="/catalog?category=oversized-tshirts" className="hover:text-theme-primary transition-colors">
+              تيشرتات
             </Link>
-            <Link href="/catalog?cat=pure-incense-candles" className="hover:text-theme-primary transition-colors">
-              {t.navigation.candles}
+            <Link href="/catalog?category=streetwear-pants" className="hover:text-theme-primary transition-colors">
+              بناطيل
+            </Link>
+            <Link href="/catalog?category=outerwear-jackets" className="hover:text-theme-primary transition-colors">
+              جاكيتات
             </Link>
           </nav>
         </div>

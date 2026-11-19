@@ -6,7 +6,7 @@ import { getAuthenticatedUser } from "@/server/middleware/auth";
 import { hashPassword, validateEgyptianPhone } from "@/server/auth/security";
 import { authStore, UserAccount } from "@/server/auth/authStore";
 
-const MASTER_ADMIN_SECRET = process.env.ADMIN_MASTER_KEY || "SanctaMariaMasterKey#2026";
+const MASTER_ADMIN_SECRET = process.env.ADMIN_MASTER_KEY || "FGCollectiveMasterKey#2026";
 
 export const POST = apiHandler(
   async (req: NextRequest) => {

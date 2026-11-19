@@ -9,13 +9,28 @@ export interface CartItem {
   quantity: number;
   variantId?: string;
   variantName?: string;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number, variantId?: string, variantName?: string) => void;
-  removeItem: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  addItem: (
+    product: Product,
+    quantity?: number,
+    variantId?: string,
+    variantName?: string,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => void;
+  removeItem: (productId: string, variantId?: string, selectedSize?: string, selectedColor?: string) => void;
+  updateQuantity: (
+    productId: string,
+    quantity: number,
+    variantId?: string,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getSubtotal: () => number;
@@ -25,10 +40,14 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (product, quantity = 1, variantId, variantName) => {
+      addItem: (product, quantity = 1, variantId, variantName, selectedSize, selectedColor) => {
         set((state) => {
           const existingIndex = state.items.findIndex(
-            (item) => item.product.id === product.id && item.variantId === variantId
+            (item) =>
+              item.product.id === product.id &&
+              item.variantId === variantId &&
+              item.selectedSize === selectedSize &&
+              item.selectedColor === selectedColor
           );
 
           if (existingIndex > -1) {
@@ -38,25 +57,37 @@ export const useCartStore = create<CartState>()(
           }
 
           return {
-            items: [...state.items, { product, quantity, variantId, variantName }],
+            items: [
+              ...state.items,
+              { product, quantity, variantId, variantName, selectedSize, selectedColor },
+            ],
           };
         });
       },
-      removeItem: (productId, variantId) => {
+      removeItem: (productId, variantId, selectedSize, selectedColor) => {
         set((state) => ({
           items: state.items.filter(
-            (item) => !(item.product.id === productId && item.variantId === variantId)
+            (item) =>
+              !(
+                item.product.id === productId &&
+                item.variantId === variantId &&
+                item.selectedSize === selectedSize &&
+                item.selectedColor === selectedColor
+              )
           ),
         }));
       },
-      updateQuantity: (productId, quantity, variantId) => {
+      updateQuantity: (productId, quantity, variantId, selectedSize, selectedColor) => {
         if (quantity <= 0) {
-          get().removeItem(productId, variantId);
+          get().removeItem(productId, variantId, selectedSize, selectedColor);
           return;
         }
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId && item.variantId === variantId
+            item.product.id === productId &&
+            item.variantId === variantId &&
+            item.selectedSize === selectedSize &&
+            item.selectedColor === selectedColor
               ? { ...item, quantity }
               : item
           ),
@@ -71,7 +102,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "sancta-maria-cart",
+      name: "fg-collective-cart",
     }
   )
 );

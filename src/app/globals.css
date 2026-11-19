@@ -1,49 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --theme-primary: #F5A623;
-  --theme-primary-hover: #D98E18;
-  --theme-primary-contrast: #1C1917;
-  --theme-accent: #E59819;
-  --theme-accent-light: #FCD678;
-  --theme-accent-dark: #B8760C;
-  --theme-gold: #F5A623;
-  --theme-gold-light: #FEE79A;
-  --theme-gold-dark: #C98212;
-  --theme-bg: #FFFFFF;
+  --theme-primary: #0A0A0A;
+  --theme-primary-hover: #262626;
+  --theme-primary-contrast: #FFFFFF;
+  --theme-accent: #171717;
+  --theme-accent-light: #525252;
+  --theme-accent-dark: #000000;
+  --theme-gold: #D4AF37;
+  --theme-gold-light: #F5E6B3;
+  --theme-gold-dark: #997A15;
+  --theme-bg: #FAFAFA;
   --theme-surface: #FFFFFF;
-  --theme-surface-elevated: #FFFBF0;
-  --theme-border: #F0E8D5;
-  --theme-border-accent: #F5A623;
-  --theme-text: #1E2229;
-  --theme-text-muted: #6B7280;
-  --theme-text-subtle: #9CA3AF;
-  --theme-olive: #D98E18;
-  --theme-danger: #DC2626;
-  --theme-success: #16A34A;
+  --theme-surface-elevated: #F5F5F5;
+  --theme-border: #E5E5E5;
+  --theme-border-accent: #0A0A0A;
+  --theme-text: #0A0A0A;
+  --theme-text-muted: #737373;
+  --theme-text-subtle: #A3A3A3;
+  --theme-danger: #EF4444;
+  --theme-success: #10B981;
+}
+
+.dark {
+  --theme-primary: #FFFFFF;
+  --theme-primary-hover: #E5E5E5;
+  --theme-primary-contrast: #0A0A0A;
+  --theme-accent: #A3A3A3;
+  --theme-accent-light: #D4D4D4;
+  --theme-accent-dark: #525252;
+  --theme-gold: #D4AF37;
+  --theme-gold-light: #FDF4D4;
+  --theme-gold-dark: #A1801E;
+  --theme-bg: #0A0A0A;
+  --theme-surface: #141414;
+  --theme-surface-elevated: #1F1F1F;
+  --theme-border: #262626;
+  --theme-border-accent: #FFFFFF;
+  --theme-text: #FAFAFA;
+  --theme-text-muted: #A3A3A3;
+  --theme-text-subtle: #737373;
+  --theme-danger: #F87171;
+  --theme-success: #34D399;
 }
 
 body {
   background-color: var(--theme-bg);
   color: var(--theme-text);
-  font-family: 'Alexandria', 'Inter', sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Alexandria', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: clip;
   direction: rtl;
 }
 
-/* Sacred Headings */
-h1, h2, h3, .font-sacred {
-  font-family: 'Alexandria', 'Cinzel', sans-serif;
-  letter-spacing: -0.01em;
+/* Editorial & Display Headings */
+h1, h2, h3, .font-editorial {
+  font-family: 'Alexandria', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-display {
-  font-family: 'Alexandria', 'Cinzel', sans-serif;
+  font-family: 'Alexandria', 'Space Grotesk', sans-serif;
+  text-transform: uppercase;
 }
 
 /* Smooth Scrolling */
@@ -51,10 +73,10 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom Gold Scrollbar */
+/* Sleek Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -62,33 +84,31 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--theme-gold);
-  border-radius: 3px;
+  background: var(--theme-border);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-gold-dark);
+  background: var(--theme-text-muted);
 }
 
-/* Liturgical Subtle Patterns */
-.bg-parchment {
-  background-color: var(--theme-bg);
-  background-image: radial-gradient(rgba(197, 160, 89, 0.08) 1px, transparent 0);
-  background-size: 24px 24px;
+/* Streetwear Badge & Grid Effects */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
-.border-filigree {
-  border: 1px solid var(--theme-border);
-  position: relative;
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
 
-.border-filigree::before {
-  content: "";
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  bottom: 2px;
-  left: 2px;
-  border: 1px solid rgba(197, 160, 89, 0.25);
-  pointer-events: none;
+.badge-tag {
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
 }

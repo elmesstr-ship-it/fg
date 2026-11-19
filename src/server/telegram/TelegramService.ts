@@ -45,7 +45,7 @@ export class TelegramService {
             telegramId: this.ownerId,
             role: "OWNER",
             firstName: "Store Owner",
-            username: "sancta_maria_owner",
+            username: "fg_collective_owner",
             isActive: true,
             addedBy: "system_bootstrap",
           },
@@ -107,7 +107,7 @@ export class TelegramService {
     });
 
     // If bot token is empty or a placeholder mock token, return immediately as successful
-    if (!this.botToken || this.botToken.startsWith("mock_") || this.botToken.includes("sancta_maria_token")) {
+    if (!this.botToken || this.botToken.startsWith("mock_") || this.botToken.includes("fg_bot_token")) {
       return true;
     }
 
@@ -153,7 +153,7 @@ export class TelegramService {
       sentAt: new Date().toISOString(),
     });
 
-    if (!this.botToken || this.botToken.startsWith("mock_") || this.botToken.includes("sancta_maria_token")) {
+    if (!this.botToken || this.botToken.startsWith("mock_") || this.botToken.includes("fg_bot_token")) {
       return true;
     }
 
@@ -940,7 +940,7 @@ export class TelegramService {
     const csvContent = "\uFEFF" + rows.join("\r\n");
     const buffer = Buffer.from(csvContent, "utf-8");
     const dateStr = now.toISOString().split("T")[0];
-    const filename = `Sancta_Maria_Orders_${dateStr}.csv`;
+    const filename = `FG_Collective_Orders_${dateStr}.csv`;
 
     await this.sendDocument(
       chatId,

@@ -52,17 +52,17 @@ export default function AdminSettingsPage() {
   const [testFeedback, setTestFeedback] = useState<string | null>(null);
 
   const [settings, setSettings] = useState({
-    storeNameAr: "سانكتا ماريا للمقتنيات الكنسية الفاخرة",
-    storeNameEn: "Sancta Maria Premium Liturgical Church Supplies",
-    supportPhone: "01000000001",
-    supportEmail: "support@sanctamaria-store.com",
-    freeShippingThreshold: 2000,
-    defaultShippingFee: 75,
+    storeNameAr: "إف جي كوليكتيف (FG Collective)",
+    storeNameEn: "FG Collective Contemporary Streetwear",
+    supportPhone: "01012345678",
+    supportEmail: "care@fgcollective.com",
+    freeShippingThreshold: 1500,
+    defaultShippingFee: 65,
     taxPercentage: 14,
     telegramNotificationsEnabled: true,
-    telegramChannelId: "@sancta_maria_store",
+    telegramChannelId: "@fg_collective_orders",
     maintenanceMessage:
-      "المتجر في طور التحديث والترقية الطقسية. سنعود للعمل بكامل طاقتنا في أقرب وقت بمشيئة الرب.",
+      "الموقع قيد التحديث لتحضير الدروب الجديد. سنعاود العمل قريباً جداً.",
   });
 
   const loadSettings = async () => {
@@ -234,7 +234,7 @@ export default function AdminSettingsPage() {
           <p className="text-xs text-theme-text-muted">
             {locale === "ar"
               ? "عند تفعيل وضع الصيانة، يتم إظهار شاشة توقف للمستخدمين مع إمكانية وصول المشرفين فقط."
-              : "When active, customers see a liturgical maintenance message while admins retain access."}
+              : "When active, customers see an exclusive drop maintenance message while admins retain access."}
           </p>
 
           {isMaintenanceMode && (

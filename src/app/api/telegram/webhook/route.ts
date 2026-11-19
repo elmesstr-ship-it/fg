@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       const incomingSecret = req.headers.get("x-telegram-bot-api-secret-token");
       // Allow if matches or in local testing mode with master key
       const masterKey = req.headers.get("x-admin-master-key");
-      if (incomingSecret !== webhookSecret && masterKey !== "SanctaMariaMasterKey#2026") {
+      if (incomingSecret !== webhookSecret && masterKey !== "FGCollectiveMasterKey#2026") {
         return NextResponse.json({ error: "Unauthorized webhook caller" }, { status: 401 });
       }
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status: "active",
-    bot: "Sancta Maria Admin Bot Webhook",
+    bot: "FG Collective Admin Bot Webhook",
     timestamp: new Date().toISOString(),
   });
 }

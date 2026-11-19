@@ -36,19 +36,19 @@ export async function POST(req: NextRequest) {
       result = { message: "Test order notification dispatched" };
     } else if (action === "test_user") {
       const mockUser = {
-        email: "test_coptic_user@example.com",
-        phone: "01099887766",
+        email: "demo.user@example.com",
+        phone: "01201234567",
       };
       const mockProfile = {
-        fullName: "مارك نبيل",
-        parishName: "كنيسة مارمرقس الكبرى - الإسكندرية",
+        fullName: "عمر الشريف",
+        parishName: "FG VIP Member",
       };
       await telegramService.notifyNewUser(mockUser, mockProfile);
       result = { message: "Test new user notification dispatched" };
     } else if (action === "test_stock") {
       const mockProd = {
-        name: { ar: "صلبان فضة كنسية فاخرة", en: "Silver Liturgical Cross" },
-        sku: "CROS-SILVER-TEST",
+        name: { ar: "هودي إف جي الثقيل 380 GSM", en: "FG Core Heavyweight Hoodie" },
+        sku: "FG-HD-380-BLK",
       };
       await telegramService.notifyStockAlert(mockProd, 2);
       result = { message: "Test stock alert dispatched" };
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     } else {
       // General test broadcast
       await telegramService.broadcast(
-        "🔔 <b>رسالة اختبار تجريبية من لوحة تحكم سانكتا ماريا!</b>\nالبوت متصل بنجاح وجاهز لاستقبال الإشعارات والأوامر.",
+        "🔔 <b>رسالة اختبار تجريبية من لوحة تحكم إف جي كوليكتيف!</b>\nالبوت متصل بنجاح وجاهز لاستقبال الإشعارات والأوامر.",
         "VIEWER",
         { parse_mode: "HTML" }
       );

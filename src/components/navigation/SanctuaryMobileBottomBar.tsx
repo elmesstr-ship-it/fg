@@ -6,34 +6,36 @@ import { usePathname } from "next/navigation";
 import { Home, Layers, ShoppingBag, Heart, User } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
+import { useAppStore } from "@/store/useAppStore";
 
 export function SanctuaryMobileBottomBar() {
   const pathname = usePathname();
+  const { locale } = useAppStore();
   const cartItems = useCartStore((state) => state.items);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const { items: wishlistItems } = useWishlistStore();
 
   const navItems = [
-    { label: "الرئيسية", href: "/", icon: Home },
-    { label: "الأقسام", href: "/catalog", icon: Layers },
+    { label: locale === "ar" ? "الرئيسية" : "Home", href: "/", icon: Home },
+    { label: locale === "ar" ? "الإصدارات" : "Drops", href: "/catalog", icon: Layers },
     {
-      label: "السلة",
+      label: locale === "ar" ? "الحقيبة" : "Bag",
       href: "/cart",
       icon: ShoppingBag,
       badge: totalItems > 0 ? totalItems : undefined,
     },
     {
-      label: "المفضلة",
+      label: locale === "ar" ? "المفضلة" : "Wishlist",
       href: "/wishlist",
       icon: Heart,
       badge: wishlistItems.length > 0 ? wishlistItems.length : undefined,
     },
-    { label: "حسابي", href: "/profile", icon: User },
+    { label: locale === "ar" ? "حسابي" : "Profile", href: "/profile", icon: User },
   ];
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 bg-[#FCFBF7]/90 backdrop-blur-lg border-t border-[#E8E2D2] pb-[env(safe-area-inset-bottom)] lg:hidden shadow-lg transition-colors duration-500"
+      className="fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 pb-[env(safe-area-inset-bottom)] lg:hidden shadow-lg transition-colors duration-300"
       aria-label="Mobile Navigation Bar"
     >
       <div className="grid grid-cols-5 h-16 items-center px-1">
@@ -46,20 +48,22 @@ export function SanctuaryMobileBottomBar() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center h-full relative transition-all duration-200 ${
-                isActive ? "text-[#781d22] font-bold" : "text-stone-500 hover:text-stone-900"
+                isActive
+                  ? "text-black dark:text-white font-black"
+                  : "text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? "scale-110 text-[#781d22]" : ""}`} />
+                <Icon className={`w-5 h-5 ${isActive ? "scale-110" : ""}`} />
                 {item.badge !== undefined && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#781d22] text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#D4AF37] text-black text-[10px] font-black flex items-center justify-center shadow-sm">
                     {item.badge}
                   </span>
                 )}
               </div>
-              <span className="text-[11px] mt-1 font-sans">{item.label}</span>
+              <span className="text-[10px] mt-1 font-sans">{item.label}</span>
               {isActive && (
-                <span className="absolute bottom-1 w-6 h-0.5 rounded-full bg-[#c5a059]" />
+                <span className="absolute bottom-1 w-6 h-0.5 rounded-full bg-black dark:bg-white" />
               )}
             </Link>
           );

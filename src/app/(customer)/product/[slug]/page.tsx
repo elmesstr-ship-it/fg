@@ -5,23 +5,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/services";
 import { Product, ProductReview } from "@/types/product";
+import { MOCK_PRODUCTS, MockProduct } from "@/lib/fashionMockData";
 import { useAppStore } from "@/store/useAppStore";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { translations } from "@/config/i18n";
-import { Button } from "@/components/ui/Button";
-import { ProductCard } from "@/components/product/ProductCard";
 import {
   ShoppingBag,
   Heart,
   Star,
   ShieldCheck,
   Truck,
+  RefreshCw,
   Sparkles,
-  MessageSquare,
   CheckCircle2,
-  Calendar,
-  Send,
+  Ruler,
+  X,
+  ArrowRight,
+  Flame,
 } from "lucide-react";
 
 export default function ProductDetailPage({
@@ -34,29 +35,22 @@ export default function ProductDetailPage({
   const t = translations[locale];
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [mockFashion, setMockFashion] = useState<MockProduct | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
-  const [reviews, setReviews] = useState<ProductReview[]>([]);
-  const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string>("M");
+  const [selectedColor, setSelectedColor] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [addedToast, setAddedToast] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
-  // Recently Viewed Products
-  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
-
-  // Product Availability Alert Form State
-  const [alertEmail, setAlertEmail] = useState("");
-  const [alertPhone, setAlertPhone] = useState("");
-  const [submittingAlert, setSubmittingAlert] = useState(false);
-  const [alertSuccess, setAlertSuccess] = useState<string | null>(null);
-
-  // New Review Form State
+  // Review Form
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
   const [reviewerName, setReviewerName] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
-  const [submittingReview, setSubmittingReview] = useState(false);
-  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewSubmittedToast, setReviewSubmittedToast] = useState(false);
 
   const addItemToCart = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
@@ -65,80 +59,101 @@ export default function ProductDetailPage({
     async function load() {
       setLoading(true);
       try {
-        const p = await db.products.getProductBySlug(resolvedParams.slug);
-        setProduct(p);
-        if (p) {
-          const [rel, revs] = await Promise.all([
-            db.products.getRelatedProducts(p.id, p.categoryId),
-            db.products.getProductReviews(p.id),
-          ]);
-          setRelated(rel);
-          setReviews(revs);
+        // First check mock fashion data
+        const foundMock = MOCK_PRODUCTS.find((p) => p.slug === resolvedParams.slug);
+        if (foundMock) {
+          setMockFashion(foundMock);
+          setSelectedSize(foundMock.sizes?.[0] || "M");
+          setSelectedColor(foundMock.colors?.[0]?.name?.[locale] || "Black");
+        }
 
-          // Update Recently Viewed Products in localStorage
+        let p = await db.products.getProductBySlug(resolvedParams.slug);
+
+        // Fallback to formatted mock if not in database
+        if (!p && foundMock) {
+          p = {
+            id: foundMock.id,
+            slug: foundMock.slug,
+            name: foundMock.name,
+            shortDescription: foundMock.tagline,
+            fullDescription: foundMock.description,
+            categoryId: foundMock.category.id,
+            categoryName: { ar: foundMock.category.nameAr, en: foundMock.category.nameEn },
+            price: foundMock.price,
+            originalPrice: foundMock.originalPrice,
+            discountPercentage: foundMock.discountPercentage,
+            stock: foundMock.stock,
+            sku: foundMock.sku,
+            images: foundMock.images,
+            isFeatured: foundMock.isFeatured,
+            isBestSeller: foundMock.isBestSeller,
+            rating: foundMock.rating,
+            reviewCount: foundMock.reviewCount,
+            specifications: {},
+            createdAt: new Date().toISOString(),
+          };
+        }
+
+        setProduct(p);
+
+        if (p) {
           try {
-            const rawStored = localStorage.getItem("sm_recently_viewed");
-            let list: Product[] = rawStored ? JSON.parse(rawStored) : [];
-            list = [p, ...list.filter((item) => item.id !== p.id)].slice(0, 5);
-            localStorage.setItem("sm_recently_viewed", JSON.stringify(list));
-            setRecentlyViewed(list.filter((item) => item.id !== p.id));
-          } catch {}
+            const [rel, revs] = await Promise.all([
+              db.products.getRelatedProducts(p.id, p.categoryId),
+              db.products.getProductReviews(p.id),
+            ]);
+            setRelated(rel);
+            setReviews(revs);
+          } catch {
+            // fallback related
+            setRelated(
+              MOCK_PRODUCTS.filter((item) => item.id !== p?.id).slice(0, 4) as any
+            );
+          }
         }
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [resolvedParams.slug]);
-
-  const selectedVariant = product?.variants?.find((v) => v.id === selectedVariantId) || null;
-  const displayPrice = selectedVariant ? selectedVariant.price : (product?.price || 0);
-  const displayStock = selectedVariant ? selectedVariant.stock : (product?.stock || 0);
+  }, [resolvedParams.slug, locale]);
 
   const handleAddToCart = () => {
     if (!product) return;
-    addItemToCart(
-      product,
-      quantity,
-      selectedVariant ? selectedVariant.id : undefined,
-      selectedVariant ? (selectedVariant.name[locale] || selectedVariant.name.ar) : undefined
-    );
+    addItemToCart(product, quantity, undefined, undefined, selectedSize, selectedColor);
     setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 2500);
+    setTimeout(() => setAddedToast(false), 2000);
   };
 
-  const handleSubmitReview = async (e: React.FormEvent) => {
+  const handleAddReview = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product || !reviewerName || !reviewComment) return;
+    if (!reviewerName.trim() || !reviewComment.trim()) return;
 
-    setSubmittingReview(true);
-    try {
-      const newRev = await db.products.addReview(product.id, {
-        userId: "cust-" + Date.now(),
-        userName: reviewerName,
-        rating: reviewRating,
-        comment: reviewComment,
-      });
+    const newRev: ProductReview = {
+      id: "rev-" + Date.now(),
+      userId: "usr-demo",
+      userName: reviewerName,
+      rating: reviewRating,
+      comment: reviewComment,
+      createdAt: new Date().toISOString(),
+    };
 
-      setReviews([newRev, ...reviews]);
-      setReviewSuccess(true);
-      setReviewerName("");
-      setReviewComment("");
-      setTimeout(() => setReviewSuccess(false), 3000);
-    } finally {
-      setSubmittingReview(false);
-    }
+    setReviews([newRev, ...reviews]);
+    setReviewerName("");
+    setReviewComment("");
+    setReviewSubmittedToast(true);
+    setTimeout(() => setReviewSubmittedToast(false), 3000);
   };
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 animate-pulse space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="aspect-square bg-theme-surface-elevated rounded-3xl" />
+          <div className="aspect-[4/5] bg-neutral-200 dark:bg-neutral-800 rounded-3xl" />
           <div className="space-y-4">
-            <div className="h-8 bg-theme-surface-elevated rounded w-3/4" />
-            <div className="h-4 bg-theme-surface-elevated rounded w-1/2" />
-            <div className="h-32 bg-theme-surface-elevated rounded w-full" />
+            <div className="h-8 bg-neutral-200 dark:bg-neutral-800 rounded w-3/4" />
+            <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-1/2" />
+            <div className="h-32 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
           </div>
         </div>
       </div>
@@ -148,425 +163,421 @@ export default function ProductDetailPage({
   if (!product) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <h1 className="font-sacred text-2xl font-bold text-theme-text">
-          {locale === "ar" ? "المنتج غير موجود" : "Product Not Found"}
+        <h1 className="text-2xl font-black text-neutral-900 dark:text-white uppercase">
+          {locale === "ar" ? "الإصدار غير متوفر حالياً" : "Product Not Found"}
         </h1>
-        <Link href="/catalog">
-          <Button variant="gold">{t.navigation.catalog}</Button>
+        <Link
+          href="/catalog"
+          className="inline-block px-6 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase"
+        >
+          {t.navigation.catalog}
         </Link>
       </div>
     );
   }
 
   const inWishlist = isInWishlist(product.id);
+  const images = product.images.length > 0 ? product.images : ["/branding/hero-banner.jpg"];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
       
       {/* Toast Notification when item is added */}
       {addedToast && (
-        <div className="fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 bg-theme-primary text-theme-primary-contrast px-4 py-3 rounded-2xl shadow-sacred-lg flex items-center gap-2 border border-theme-gold/40 animate-fade-in text-xs font-bold">
-          <CheckCircle2 className="w-4 h-4 text-theme-gold" />
-          <span>{locale === "ar" ? "تمت إضافة المقتنى إلى سلة الشراء بنجاح!" : "Item added to cart!"}</span>
+        <div className="fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 bg-black dark:bg-white text-white dark:text-black px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in duration-200 text-xs font-bold">
+          <CheckCircle2 className="w-5 h-5 text-[#D4AF37]" />
+          <div>
+            <span>{locale === "ar" ? "تمت إضافة القطعة إلى حقيبة التسوق!" : "Added to your shopping bag!"}</span>
+            <span className="block text-[10px] opacity-75 font-mono">
+              {selectedSize} • {selectedColor}
+            </span>
+          </div>
         </div>
       )}
 
-      {/* Product View Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      {/* 1. PRODUCT DETAIL MAIN GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* Main Image Gallery */}
-        <div className="space-y-4">
-          <div className="relative aspect-square rounded-3xl overflow-hidden border border-theme-border bg-theme-surface shadow-sacred">
+        {/* Left: Multi-Image Editorial Gallery */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-md">
             <Image
-              src={product.images[0]}
-              alt={product.name[locale]}
+              src={images[selectedImageIndex] || images[0]}
+              alt={product.name[locale] || product.name.ar}
               fill
               priority
-              className="object-cover object-center"
+              className="object-cover object-center transition-all duration-500"
             />
+            {product.discountPercentage && (
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-black bg-[#D4AF37] text-black">
+                -{product.discountPercentage}% OFF
+              </span>
+            )}
           </div>
+
+          {/* Thumbnails Strip */}
+          {images.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImageIndex(idx)}
+                  className={`relative w-20 h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
+                    selectedImageIndex === idx
+                      ? "border-black dark:border-white scale-105"
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image src={img} alt="Thumbnail" fill className="object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Product Details & Actions */}
-        <div className="space-y-6">
+        {/* Right: Product Actions & Specs */}
+        <div className="lg:col-span-5 space-y-6">
           <div>
-            <span className="text-xs font-semibold text-theme-gold uppercase tracking-wider">
-              {product.categoryName[locale]}
-            </span>
-            <h1 className="font-sacred text-2xl sm:text-3xl font-extrabold text-theme-text mt-1">
-              {product.name[locale]}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] font-mono">
+                {product.categoryName[locale] || product.categoryName.ar}
+              </span>
+              <span className="text-xs font-mono text-neutral-400">
+                SKU: {product.sku}
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-black text-neutral-950 dark:text-white uppercase tracking-tight mt-1">
+              {product.name[locale] || product.name.ar}
             </h1>
-            <div className="flex items-center gap-2 mt-2 text-xs text-theme-text-muted">
+
+            {/* Rating Stars & Reviews Count */}
+            <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500">
               <div className="flex text-amber-400">
-                <Star className="w-4 h-4 fill-current" />
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                ))}
               </div>
-              <span className="font-bold text-theme-text">{product.rating}</span>
-              <span>({reviews.length} {locale === "ar" ? "تقييم مؤكد" : "verified reviews"})</span>
-              <span className="text-theme-border">•</span>
-              <span className="text-theme-gold font-mono font-bold">{product.sku}</span>
+              <span className="font-bold">{product.rating}</span>
+              <span>({product.reviewCount} {locale === "ar" ? "تقييم مشتري" : "reviews"})</span>
             </div>
           </div>
 
-          {/* Pricing */}
-          <div className="p-4 rounded-2xl bg-theme-surface-elevated/70 border border-theme-border flex items-baseline gap-3">
-            <span className="text-3xl font-extrabold text-theme-primary">
-              {displayPrice.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")}
+          {/* Price */}
+          <div className="flex items-baseline gap-3 py-3 border-y border-neutral-200 dark:border-neutral-800">
+            <span className="text-3xl font-black text-neutral-950 dark:text-white">
+              {product.price.toLocaleString()}{" "}
+              <span className="text-sm font-bold text-neutral-500">{locale === "ar" ? "ج.م" : "EGP"}</span>
             </span>
-            <span className="text-sm font-semibold text-theme-text-muted">{t.common.priceEGP}</span>
-            {product.originalPrice && !selectedVariant && (
-              <span className="text-sm line-through text-theme-text-muted">
-                {product.originalPrice.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} {t.common.priceEGP}
+            {product.originalPrice && (
+              <span className="text-base line-through text-neutral-400">
+                {product.originalPrice.toLocaleString()} ج.م
               </span>
             )}
-            <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-              displayStock === 0
-                ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                : displayStock <= 5
-                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-            }`}>
-              {displayStock === 0
-                ? (locale === "ar" ? "نفد من المخزون" : "Out of Stock")
-                : `${t.common.inStock} (${displayStock} ${locale === "ar" ? "قطع متوفرة" : "left"})`}
-            </span>
           </div>
 
-          {/* Variants Selector */}
-          {product.variants && product.variants.length > 0 && (
+          {/* Short Description */}
+          <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+            {product.shortDescription[locale] || product.shortDescription.ar}
+          </p>
+
+          {/* Color Selection */}
+          {mockFashion?.colors && mockFashion.colors.length > 0 && (
             <div className="space-y-2">
-              <span className="text-xs font-bold text-theme-text block">
-                {locale === "ar" ? "المقاسات والطرازات الطقسية المتاحة:" : "Available Variants & Sizes:"}
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setSelectedVariantId(null)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    selectedVariantId === null
-                      ? "border-theme-gold bg-theme-gold/15 text-theme-gold ring-1 ring-theme-gold"
-                      : "border-theme-border bg-theme-surface text-theme-text hover:border-theme-gold/40"
-                  }`}
-                >
-                  {locale === "ar" ? "القياسي (الأساسي)" : "Standard Base"} ({product.price.toLocaleString()} {t.common.priceEGP})
-                </button>
-                {product.variants.map((v) => (
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="uppercase text-neutral-500">{t.common.color}:</span>
+                <span className="text-neutral-900 dark:text-white font-mono">{selectedColor}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {mockFashion.colors.map((c, idx) => (
                   <button
-                    key={v.id}
-                    type="button"
-                    onClick={() => setSelectedVariantId(v.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                      selectedVariantId === v.id
-                        ? "border-theme-gold bg-theme-gold/15 text-theme-gold ring-1 ring-theme-gold"
-                        : "border-theme-border bg-theme-surface text-theme-text hover:border-theme-gold/40"
+                    key={idx}
+                    onClick={() => setSelectedColor(c.name[locale] || c.name.ar)}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${
+                      selectedColor === (c.name[locale] || c.name.ar)
+                        ? "border-black dark:border-white scale-110 ring-2 ring-[#D4AF37]"
+                        : "border-neutral-300 dark:border-neutral-700"
                     }`}
-                  >
-                    {v.name[locale] || v.name.ar} ({v.price.toLocaleString()} {t.common.priceEGP})
-                  </button>
+                    style={{ backgroundColor: c.hex }}
+                    title={c.name[locale] || c.name.ar}
+                  />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Short description */}
-          <p className="text-xs sm:text-sm text-theme-text-muted leading-relaxed">
-            {product.shortDescription[locale]}
-          </p>
-
-          {/* Quantity Controls & Add to Cart */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <div className="flex items-center border border-theme-border rounded-xl bg-theme-surface w-fit">
+          {/* Size Selection & Size Guide Modal Trigger */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="uppercase text-neutral-500">{t.common.size}:</span>
               <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3.5 py-2.5 hover:bg-theme-surface-elevated text-theme-text font-bold transition-colors"
+                onClick={() => setIsSizeGuideOpen(true)}
+                className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white flex items-center gap-1 underline underline-offset-4"
+              >
+                <Ruler className="w-3.5 h-3.5" />
+                <span>{t.common.sizeGuide}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2">
+              {(mockFashion?.sizes || ["S", "M", "L", "XL", "XXL"]).map((sz) => (
+                <button
+                  key={sz}
+                  onClick={() => setSelectedSize(sz)}
+                  className={`py-2.5 rounded-xl text-xs font-black uppercase transition-all ${
+                    selectedSize === sz
+                      ? "bg-black dark:bg-white text-white dark:text-black shadow-md scale-102"
+                      : "bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-black dark:hover:border-white"
+                  }`}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quantity & Add to Bag */}
+          <div className="flex items-center gap-3 pt-2">
+            {/* Quantity Selector */}
+            <div className="flex items-center border border-neutral-300 dark:border-neutral-700 rounded-xl bg-neutral-100 dark:bg-neutral-900 px-3 py-2">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-2 font-bold text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
               >
                 -
               </button>
-              <span className="px-4 text-xs font-bold text-theme-text">{quantity}</span>
+              <span className="px-3 text-sm font-black font-mono">{quantity}</span>
               <button
-                onClick={() => setQuantity(Math.min(displayStock, quantity + 1))}
-                disabled={displayStock === 0}
-                className="px-3.5 py-2.5 hover:bg-theme-surface-elevated text-theme-text font-bold transition-colors disabled:opacity-40"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-2 font-bold text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
               >
                 +
               </button>
             </div>
 
-            <Button
-              variant="gold"
-              size="lg"
-              disabled={displayStock === 0}
-              className="flex-1 rounded-xl shadow-sacred disabled:opacity-50"
+            {/* Add to Cart Button */}
+            <button
               onClick={handleAddToCart}
+              className="flex-1 py-3.5 rounded-xl bg-black dark:bg-white text-white dark:text-black font-black text-sm uppercase tracking-wider shadow-lg hover:opacity-90 flex items-center justify-center gap-2 transition-all"
             >
-              <ShoppingBag className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-              <span>{displayStock === 0 ? (locale === "ar" ? "نفد من المخزون" : "Out of Stock") : t.common.addToCart}</span>
-            </Button>
+              <ShoppingBag className="w-4 h-4" />
+              <span>{t.common.addToCart}</span>
+            </button>
 
+            {/* Wishlist Button */}
             <button
               onClick={() => toggleWishlist(product)}
-              className={`p-3.5 rounded-xl border border-theme-border transition-colors ${
-                inWishlist ? "bg-red-50 text-red-500 border-red-200" : "hover:bg-theme-surface-elevated text-theme-text"
+              className={`p-3.5 rounded-xl border transition-colors ${
+                inWishlist
+                  ? "bg-red-500 border-red-500 text-white"
+                  : "border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white text-neutral-700 dark:text-neutral-300"
               }`}
-              title={t.common.wishlist}
             >
               <Heart className={`w-5 h-5 ${inWishlist ? "fill-current" : ""}`} />
             </button>
           </div>
 
-          {/* Product Availability Alert if Out of Stock */}
-          {displayStock === 0 && (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
-              <div className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                <span>{locale === "ar" ? "تنبيه عند توفر المنتج بالمخزون" : "Notify Me When Available"}</span>
-              </div>
-              <p className="text-[11px] text-theme-text-muted">
-                {locale === "ar"
-                  ? "أدخل بريدك أو هاتفك وسنقوم بإشعارك فور إعادة تصنيع وتوفير هذا المقتنى الطقسي."
-                  : "Enter your contact details to receive an alert when restocked."}
-              </p>
-
-              {alertSuccess ? (
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 text-xs font-bold">
-                  {alertSuccess}
-                </div>
-              ) : (
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!alertEmail) return;
-                    setSubmittingAlert(true);
-                    const res = await fetch("/api/products/alerts", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        productId: product.id,
-                        email: alertEmail,
-                        phone: alertPhone,
-                      }),
-                    }).then((r) => r.json());
-                    setSubmittingAlert(false);
-                    if (res.success) {
-                      setAlertSuccess(
-                        locale === "ar" ? "تم تسجيل طلب التنبيه بنجاح!" : "Availability alert registered!"
-                      );
-                    }
-                  }}
-                  className="flex flex-col sm:flex-row gap-2 pt-1"
-                >
-                  <input
-                    type="email"
-                    required
-                    placeholder={locale === "ar" ? "بريدك الإلكتروني" : "Your email"}
-                    value={alertEmail}
-                    onChange={(e) => setAlertEmail(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-theme-border bg-theme-surface text-theme-text text-xs outline-none focus:ring-1 focus:ring-theme-gold flex-1"
-                  />
-                  <input
-                    type="tel"
-                    placeholder={locale === "ar" ? "رقم الهاتف (اختياري)" : "Phone (optional)"}
-                    value={alertPhone}
-                    onChange={(e) => setAlertPhone(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border border-theme-border bg-theme-surface text-theme-text font-mono text-xs outline-none focus:ring-1 focus:ring-theme-gold sm:w-36"
-                  />
-                  <Button variant="gold" size="sm" type="submit" disabled={submittingAlert} className="rounded-xl text-xs">
-                    {submittingAlert ? (locale === "ar" ? "جاري التسجيل..." : "Saving...") : (locale === "ar" ? "أخطرني" : "Notify Me")}
-                  </Button>
-                </form>
-              )}
+          {/* Garment Specifications Highlights */}
+          <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-neutral-500 font-mono">FABRIC COMPOSITION</span>
+              <span className="font-bold text-neutral-900 dark:text-white">100% Egyptian Combed Cotton</span>
             </div>
-          )}
-
-          {/* Liturgical Assurances */}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-theme-border">
-            <div className="flex items-center gap-2.5 text-xs text-theme-text-muted">
-              <ShieldCheck className="w-4 h-4 text-theme-gold flex-shrink-0" />
-              <span>{locale === "ar" ? "أصالة طقسية ونقاء كنسي معتمد" : "Liturgical Sanctity Guarantee"}</span>
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-neutral-500 font-mono">DENSITY</span>
+              <span className="font-bold text-[#D4AF37]">380 GSM Heavy French Terry</span>
             </div>
-            <div className="flex items-center gap-2.5 text-xs text-theme-text-muted">
-              <Truck className="w-4 h-4 text-theme-gold flex-shrink-0" />
-              <span>{locale === "ar" ? "تغليف وقائي مصفح فاخر للشحن" : "Reinforced Protective Packaging"}</span>
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-neutral-500 font-mono">FIT SILHOUETTE</span>
+              <span className="font-bold text-neutral-900 dark:text-white">Oversized Drop-Shoulder</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-neutral-500 font-mono">MANUFACTURE</span>
+              <span className="font-bold text-neutral-900 dark:text-white">Crafted in Cairo, Egypt</span>
             </div>
           </div>
 
+          {/* Shipping & Guarantee Badges */}
+          <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
+            <div className="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800">
+              <Truck className="w-4 h-4 text-[#D4AF37]" />
+              <span>{locale === "ar" ? "توصيل سريع 24-48 ساعة" : "24-48h Delivery"}</span>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800">
+              <RefreshCw className="w-4 h-4 text-[#D4AF37]" />
+              <span>{locale === "ar" ? "استبدال مقاس خلال 14 يوم" : "14-Day Free Exchange"}</span>
+            </div>
+          </div>
         </div>
 
       </div>
 
-      {/* Tabs for Description, Specifications, and Reviews */}
-      <div className="space-y-6 pt-6">
-        <div className="flex border-b border-theme-border gap-6 text-sm font-sacred">
-          <button
-            onClick={() => setActiveTab("desc")}
-            className={`pb-3 border-b-2 font-bold transition-colors ${
-              activeTab === "desc" ? "border-theme-gold text-theme-primary" : "border-transparent text-theme-text-muted hover:text-theme-text"
-            }`}
-          >
-            {locale === "ar" ? "الوصف والرمزية الطقسية" : "Description & Spiritual Value"}
-          </button>
-          <button
-            onClick={() => setActiveTab("specs")}
-            className={`pb-3 border-b-2 font-bold transition-colors ${
-              activeTab === "specs" ? "border-theme-gold text-theme-primary" : "border-transparent text-theme-text-muted hover:text-theme-text"
-            }`}
-          >
-            {locale === "ar" ? "المواصفات الفنية والمصنعية" : "Technical Specifications"}
-          </button>
-          <button
-            onClick={() => setActiveTab("reviews")}
-            className={`pb-3 border-b-2 font-bold transition-colors ${
-              activeTab === "reviews" ? "border-theme-gold text-theme-primary" : "border-transparent text-theme-text-muted hover:text-theme-text"
-            }`}
-          >
-            {locale === "ar" ? `تقييمات ومباركات المشترين (${reviews.length})` : `Reviews (${reviews.length})`}
-          </button>
+      {/* 2. PRODUCT FULL DESCRIPTION & REVIEWS */}
+      <div className="border-t border-neutral-200 dark:border-neutral-800 pt-12 space-y-8">
+        <div>
+          <h2 className="text-xl font-black uppercase text-neutral-950 dark:text-white mb-4">
+            {locale === "ar" ? "تفاصيل القطعة والعناية" : "Product Details & Fabric Care"}
+          </h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-3xl">
+            {product.fullDescription[locale] || product.fullDescription.ar}
+          </p>
         </div>
 
-        {/* Tab 1: Full Description */}
-        {activeTab === "desc" && (
-          <div className="p-6 rounded-3xl bg-theme-surface border border-theme-border leading-relaxed text-xs sm:text-sm text-theme-text space-y-4">
-            <p>{product.fullDescription[locale]}</p>
+        {/* Customer Reviews Section */}
+        <div className="pt-8 border-t border-neutral-200 dark:border-neutral-800 space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-black uppercase">
+              {locale === "ar" ? "تقييمات المشترين" : "Customer Reviews"} ({reviews.length})
+            </h3>
           </div>
-        )}
 
-        {/* Tab 2: Specifications */}
-        {activeTab === "specs" && (
-          <div className="p-6 rounded-3xl bg-theme-surface border border-theme-border space-y-3">
-            {Object.entries(product.specifications).map(([key, val]) => (
-              <div key={key} className="flex justify-between py-2 border-b border-theme-border/40 last:border-none text-xs">
-                <span className="text-theme-text-muted font-medium capitalize">{key}</span>
-                <span className="font-bold text-theme-text">{val[locale]}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tab 3: Interactive Reviews System */}
-        {activeTab === "reviews" && (
-          <div className="space-y-6">
-            
-            {/* Reviews List */}
-            <div className="space-y-4">
-              {reviews.length === 0 ? (
-                <div className="p-8 text-center bg-theme-surface rounded-2xl border border-theme-border text-xs text-theme-text-muted">
-                  {locale === "ar" ? "كن أول من يكتب تقييماً أو كلمة مباركة عن هذا المقتنى." : "Be the first to review this sacred item."}
-                </div>
-              ) : (
-                reviews.map((rev) => (
-                  <div key={rev.id} className="p-5 rounded-2xl bg-theme-surface border border-theme-border space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-theme-text">{rev.userName}</span>
-                        <div className="flex text-amber-400">
-                          {Array.from({ length: rev.rating }).map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-theme-text-muted font-mono">
-                        {new Date(rev.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US")}
-                      </span>
-                    </div>
-                    <p className="text-xs text-theme-text-muted leading-relaxed">{rev.comment}</p>
+          {/* Reviews List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reviews.map((rev) => (
+              <div
+                key={rev.id}
+                className="p-4 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2 text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold">{rev.userName}</span>
+                  <div className="flex text-amber-400">
+                    {[...Array(rev.rating)].map((_, i) => (
+                      <Star key={i} className="w-3 h-3 fill-current" />
+                    ))}
                   </div>
-                ))
-              )}
-            </div>
-
-            {/* Submit a Review Form */}
-            <form onSubmit={handleSubmitReview} className="p-6 rounded-3xl bg-theme-surface border border-theme-border shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-theme-border pb-3">
-                <h3 className="font-sacred text-sm font-bold text-theme-text flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-theme-gold" />
-                  <span>{locale === "ar" ? "أضف كلمتك أو تقييمك للمقتنى" : "Write a Sacred Review"}</span>
-                </h3>
-                {reviewSuccess && (
-                  <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {locale === "ar" ? "تم نشر تقييمكم المبارك بنجاح!" : "Review published!"}
-                  </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <label className="block text-theme-text-muted mb-1 font-medium">الاسم الكامل *</label>
-                  <input
-                    type="text"
-                    required
-                    value={reviewerName}
-                    onChange={(e) => setReviewerName(e.target.value)}
-                    placeholder="مثال: د. ماجد بشارة"
-                    className="w-full px-3 py-2 rounded-xl border border-theme-border bg-theme-surface-elevated text-theme-text outline-none focus:ring-2 focus:ring-theme-gold"
-                  />
                 </div>
-
-                <div>
-                  <label className="block text-theme-text-muted mb-1 font-medium">التقييم النجمي</label>
-                  <select
-                    value={reviewRating}
-                    onChange={(e) => setReviewRating(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl border border-theme-border bg-theme-surface-elevated text-theme-text outline-none"
-                  >
-                    <option value={5}>★★★★★ (5 نجوم - امتياز طقسي)</option>
-                    <option value={4}>★★★★☆ (4 نجوم - جودة عالية)</option>
-                    <option value={3}>★★★☆☆ (3 نجوم - جيد)</option>
-                  </select>
-                </div>
+                <p className="text-neutral-600 dark:text-neutral-400">{rev.comment}</p>
+                <span className="block text-[10px] text-neutral-400 font-mono">
+                  {new Date(rev.createdAt).toLocaleDateString()}
+                </span>
               </div>
-
-              <div>
-                <label className="block text-xs text-theme-text-muted mb-1 font-medium">نص التقييم والملاحظات *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  placeholder={locale === "ar" ? "اكتب رأيك الصادق في جودة المقتنى، التذهيب، أو التغليف..." : "Share your honest impressions..."}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-theme-border bg-theme-surface-elevated text-theme-text outline-none focus:ring-2 focus:ring-theme-gold"
-                />
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <Button type="submit" variant="gold" size="sm" isLoading={submittingReview} className="rounded-xl">
-                  <Send className="w-3.5 h-3.5 mr-1.5 rtl:mr-0 rtl:ml-1.5" />
-                  <span>{locale === "ar" ? "إرسال التقييم" : "Submit Review"}</span>
-                </Button>
-              </div>
-            </form>
-
+            ))}
           </div>
-        )}
+
+          {/* Add Review Form */}
+          <form onSubmit={handleAddReview} className="p-6 rounded-2xl bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 max-w-xl space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider">
+              {locale === "ar" ? "أضف تقييمك للقطعة" : "Leave a Review"}
+            </h4>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder={locale === "ar" ? "اسمك..." : "Your Name"}
+                value={reviewerName}
+                onChange={(e) => setReviewerName(e.target.value)}
+                className="flex-1 px-3 py-2 text-xs rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+                required
+              />
+              <select
+                value={reviewRating}
+                onChange={(e) => setReviewRating(Number(e.target.value))}
+                className="px-3 py-2 text-xs rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+              >
+                <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
+                <option value={4}>⭐⭐⭐⭐ (4/5)</option>
+                <option value={3}>⭐⭐⭐ (3/5)</option>
+              </select>
+            </div>
+            <textarea
+              placeholder={locale === "ar" ? "رأيك في الخامة والمقاس..." : "Your feedback on fabric and fit..."}
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+              required
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-black dark:bg-white text-white dark:text-black text-xs font-bold hover:opacity-90"
+            >
+              {locale === "ar" ? "إرسال التقييم" : "Submit Review"}
+            </button>
+            {reviewSubmittedToast && (
+              <p className="text-xs text-emerald-500 font-bold">
+                {locale === "ar" ? "✓ شكراً لمشاركتك! تم نشر تقييمك." : "✓ Review published successfully!"}
+              </p>
+            )}
+          </form>
+        </div>
       </div>
 
-      {/* Related Products */}
-      {related.length > 0 && (
-        <div className="space-y-6 pt-10 border-t border-theme-border">
-          <h2 className="font-sacred text-xl font-bold text-theme-text">
-            {locale === "ar" ? "مقتنيات مقدسة ذات صلة" : "Related Sacred Offerings"}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {related.map((relProd) => (
-              <ProductCard key={relProd.id} product={relProd} />
-            ))}
+      {/* 3. SIZE GUIDE MODAL */}
+      {isSizeGuideOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-neutral-950 rounded-3xl max-w-lg w-full p-6 border border-neutral-200 dark:border-neutral-800 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
+              <div className="flex items-center gap-2">
+                <Ruler className="w-5 h-5 text-[#D4AF37]" />
+                <h3 className="text-base font-black uppercase">
+                  {locale === "ar" ? "دليل مقاسات FG (بالسنتيمتر)" : "FG Size Chart (Centimeters)"}
+                </h3>
+              </div>
+              <button onClick={() => setIsSizeGuideOpen(false)} className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-900">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-neutral-500">
+              {locale === "ar"
+                ? "قصاتنا مصممة بنمط أوفرسايز (Oversized Boxy). إذا كنت تفضل المقاس المعتاد اختر مقاسك الأصلي، أو اختر مقاساً أصغر للمظهر المنتظم."
+                : "Our garments are intentionally cut oversized. Stick to your true size for the intended boxy streetwear fit."}
+            </div>
+
+            {/* Measurement Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-center border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 dark:bg-neutral-900 font-mono font-bold text-neutral-700 dark:text-neutral-300">
+                    <th className="py-2.5 px-3 border border-neutral-200 dark:border-neutral-800">Size</th>
+                    <th className="py-2.5 px-3 border border-neutral-200 dark:border-neutral-800">Chest (عرض الصدر)</th>
+                    <th className="py-2.5 px-3 border border-neutral-200 dark:border-neutral-800">Length (الطول)</th>
+                    <th className="py-2.5 px-3 border border-neutral-200 dark:border-neutral-800">Shoulder (الكتف)</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono">
+                  <tr>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800 font-bold">S</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">58 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">70 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">54 cm</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800 font-bold">M</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">61 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">73 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">56 cm</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800 font-bold">L</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">64 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">76 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">58 cm</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800 font-bold">XL</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">67 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">79 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">60 cm</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800 font-bold">XXL</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">70 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">82 cm</td>
+                    <td className="py-2 border border-neutral-200 dark:border-neutral-800">62 cm</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              onClick={() => setIsSizeGuideOpen(false)}
+              className="w-full py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase"
+            >
+              {locale === "ar" ? "فهمت المقاس" : "Got it"}
+            </button>
           </div>
         </div>
       )}
-
-      {/* Recently Viewed Products */}
-      {recentlyViewed.length > 0 && (
-        <div className="space-y-6 pt-8 border-t border-theme-border">
-          <h2 className="font-sacred text-lg font-bold text-theme-gold">
-            {locale === "ar" ? "منتجات شاهدتها مؤخراً" : "Recently Viewed Items"}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recentlyViewed.map((viewedProd) => (
-              <ProductCard key={viewedProd.id} product={viewedProd} />
-            ))}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

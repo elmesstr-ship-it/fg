@@ -13,12 +13,12 @@ interface Particle {
   pulseSpeed?: number;
   angle?: number;
   color?: string;
-  type?: "goldCross" | "censerSmoke" | "snow" | "goldStar" | "leaf" | "candleGlow";
+  type?: "dot" | "snow" | "sparkle" | "sunMote";
 }
 
 export function SeasonalCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { currentMode, christmasSubMode } = useSeasonalVisualStore();
+  const { currentMode, festiveSubMode } = useSeasonalVisualStore();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,99 +40,72 @@ export function SeasonalCanvas() {
     const particles: Particle[] = [];
     const count =
       currentMode === "default"
-        ? 22 // Elegant floating gold liturgical crosses and radiant sparkles
-        : currentMode === "christmas"
-        ? christmasSubMode === "festive"
-          ? 65
-          : 32
-        : 28; // Halloween / Autumn
+        ? 18 // Minimal luxury floating motes
+        : currentMode === "winter" || currentMode === "christmas"
+        ? festiveSubMode === "festive"
+          ? 55
+          : 30
+        : 22; // Ramadan, Eid, Summer
 
     for (let i = 0; i < count; i++) {
       if (currentMode === "default") {
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          radius: Math.random() * 4 + 2,
-          speedY: -(Math.random() * 0.4 + 0.15), // Ascends gently like evening incense
-          speedX: (Math.random() - 0.5) * 0.3,
+          radius: Math.random() * 2 + 1,
+          speedY: -(Math.random() * 0.3 + 0.1),
+          speedX: (Math.random() - 0.5) * 0.2,
+          opacity: Math.random() * 0.25 + 0.08,
+          type: "dot",
+        });
+      } else if (currentMode === "winter" || currentMode === "christmas") {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2.8 + 1.2,
+          speedY: Math.random() * 0.7 + 0.3,
+          speedX: (Math.random() - 0.5) * 0.4,
+          opacity: Math.random() * 0.5 + 0.2,
+          type: "snow",
+        });
+      } else if (currentMode === "ramadan" || currentMode === "eid_fitr" || currentMode === "eid_adha") {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2.5 + 1,
+          speedY: -(Math.random() * 0.35 + 0.1),
+          speedX: (Math.random() - 0.5) * 0.25,
           opacity: Math.random() * 0.4 + 0.15,
-          angle: Math.random() * 360,
-          type: Math.random() > 0.5 ? "goldCross" : "censerSmoke",
+          color: Math.random() > 0.4 ? "#D4AF37" : "#F59E0B",
+          type: "sparkle",
         });
-      } else if (currentMode === "christmas") {
+      } else if (currentMode === "summer") {
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          radius: Math.random() * 3 + 1.5,
-          speedY: Math.random() * 0.8 + 0.4,
-          speedX: (Math.random() - 0.5) * 0.5,
-          opacity: Math.random() * 0.6 + 0.3,
-          angle: Math.random() * 360,
-          type: Math.random() > 0.75 ? "goldStar" : "snow",
-        });
-      } else if (currentMode === "halloween") {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          radius: Math.random() * 3.5 + 2,
-          speedY: Math.random() * 0.6 + 0.3,
-          speedX: Math.sin(Math.random() * 3) * 0.7,
-          opacity: Math.random() * 0.4 + 0.2,
-          angle: Math.random() * 360,
-          color: Math.random() > 0.5 ? "#E65100" : "#752092",
-          type: Math.random() > 0.7 ? "candleGlow" : "leaf",
+          radius: Math.random() * 3 + 1,
+          speedY: -(Math.random() * 0.25 + 0.08),
+          speedX: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.3 + 0.1,
+          color: "#38BDF8",
+          type: "sunMote",
         });
       }
     }
 
-    const drawCross = (x: number, y: number, size: number, opacity: number) => {
+    const drawSparkle = (cx: number, cy: number, size: number, opacity: number, color: string) => {
       ctx.save();
-      ctx.translate(x, y);
-      ctx.strokeStyle = `rgba(197, 160, 89, ${opacity})`;
-      ctx.lineWidth = 1.5;
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = "#C5A059";
-
-      // Vertical line
+      ctx.translate(cx, cy);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = opacity;
       ctx.beginPath();
+      // 4-point subtle star
       ctx.moveTo(0, -size);
-      ctx.lineTo(0, size);
-      ctx.stroke();
-
-      // Horizontal line (placed at 1/3 from top for classic liturgical cross)
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.65, -size * 0.35);
-      ctx.lineTo(size * 0.65, -size * 0.35);
-      ctx.stroke();
-
-      ctx.restore();
-    };
-
-    const drawStar = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number, opacity: number) => {
-      let rot = (Math.PI / 2) * 3;
-      let x = cx;
-      let y = cy;
-      const step = Math.PI / spikes;
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - outerRadius);
-      for (let i = 0; i < spikes; i++) {
-        x = cx + Math.cos(rot) * outerRadius;
-        y = cy + Math.sin(rot) * outerRadius;
-        ctx.lineTo(x, y);
-        rot += step;
-
-        x = cx + Math.cos(rot) * innerRadius;
-        y = cy + Math.sin(rot) * innerRadius;
-        ctx.lineTo(x, y);
-        rot += step;
-      }
-      ctx.lineTo(cx, cy - outerRadius);
+      ctx.quadraticCurveTo(0, 0, size, 0);
+      ctx.quadraticCurveTo(0, 0, 0, size);
+      ctx.quadraticCurveTo(0, 0, -size, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -size);
       ctx.closePath();
-      ctx.fillStyle = `rgba(212, 175, 55, ${opacity})`;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "#FFD700";
       ctx.fill();
       ctx.restore();
     };
@@ -145,93 +118,43 @@ export function SeasonalCanvas() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. DEFAULT THEME: Floating Byzantine Crosses & Sacred Incense Spores
-      if (currentMode === "default") {
-        for (const p of particles) {
-          if (p.type === "goldCross") {
-            drawCross(p.x, p.y, p.radius * 2, p.opacity);
-          } else {
-            // Incense glow
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(197, 160, 89, ${p.opacity * 0.6})`;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "rgba(197, 160, 89, 0.4)";
-            ctx.fill();
-          }
-
-          p.y += p.speedY;
-          p.x += p.speedX;
-
-          if (p.y < -20) {
-            p.y = height + 10;
-            p.x = Math.random() * width;
-          }
-          if (p.x > width) p.x = 0;
-          if (p.x < 0) p.x = width;
+      for (const p of particles) {
+        if (p.type === "sparkle") {
+          drawSparkle(p.x, p.y, p.radius * 2, p.opacity, p.color || "#D4AF37");
+        } else if (p.type === "snow") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+          ctx.shadowBlur = 4;
+          ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
+          ctx.fill();
+        } else if (p.type === "sunMote") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(56, 189, 248, ${p.opacity})`;
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = "rgba(56, 189, 248, 0.4)";
+          ctx.fill();
+        } else {
+          // Minimal luxury dot
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(212, 175, 55, ${p.opacity})`;
+          ctx.fill();
         }
-      }
 
-      // 2. CHRISTMAS THEME: Bethlehem Stars & Dancing Snowflakes
-      if (currentMode === "christmas") {
-        for (const p of particles) {
-          if (p.type === "goldStar") {
-            drawStar(p.x, p.y, 4, p.radius * 2.5, p.radius * 1.2, p.opacity);
-          } else {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = "rgba(255, 255, 255, 0.6)";
-            ctx.fill();
-          }
+        p.y += p.speedY;
+        p.x += p.speedX;
 
-          p.y += p.speedY;
-          p.x += p.speedX;
-
-          if (p.y > height + 10) {
-            p.y = -10;
-            p.x = Math.random() * width;
-          }
-          if (p.x > width) p.x = 0;
-          if (p.x < 0) p.x = width;
+        if (p.speedY < 0 && p.y < -15) {
+          p.y = height + 10;
+          p.x = Math.random() * width;
+        } else if (p.speedY > 0 && p.y > height + 15) {
+          p.y = -10;
+          p.x = Math.random() * width;
         }
-      }
-
-      // 3. HALLOWEEN THEME: Autumn Leaves & Warm Amber Candle Spores
-      if (currentMode === "halloween") {
-        for (const p of particles) {
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          if (p.angle !== undefined) ctx.rotate((p.angle * Math.PI) / 180);
-
-          if (p.type === "leaf") {
-            ctx.fillStyle = p.color || "#E65100";
-            ctx.globalAlpha = p.opacity;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, p.radius * 2, p.radius, 0, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            ctx.beginPath();
-            ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(230, 81, 0, 0.7)";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#FF6F00";
-            ctx.fill();
-          }
-          ctx.restore();
-
-          p.y += p.speedY;
-          p.x += p.speedX;
-          if (p.angle !== undefined) p.angle += 0.4;
-
-          if (p.y > height + 10) {
-            p.y = -10;
-            p.x = Math.random() * width;
-          }
-          if (p.x > width) p.x = 0;
-          if (p.x < 0) p.x = width;
-        }
+        if (p.x > width) p.x = 0;
+        if (p.x < 0) p.x = width;
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -243,12 +166,12 @@ export function SeasonalCanvas() {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [currentMode, christmasSubMode]);
+  }, [currentMode, festiveSubMode]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-30 h-full w-full opacity-80"
+      className="pointer-events-none fixed inset-0 z-30 h-full w-full opacity-60"
       aria-hidden="true"
     />
   );

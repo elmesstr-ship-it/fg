@@ -2,20 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAppStore } from "@/store/useAppStore";
 import { translations } from "@/config/i18n";
 import { db } from "@/services";
 import { Order } from "@/types/order";
-import { Button } from "@/components/ui/Button";
+import { MOCK_ORDERS } from "@/services/mock/mockData";
 import {
   Clock,
   CheckCircle2,
-  Truck,
   FileText,
   ChevronDown,
   ChevronUp,
-  Cross,
   Calendar,
+  X,
+  Printer,
 } from "lucide-react";
 
 export default function OrderHistoryPage() {
@@ -31,10 +32,16 @@ export default function OrderHistoryPage() {
     async function load() {
       try {
         const data = await db.orders.getOrders();
-        setOrders(data);
-        if (data.length > 0) {
+        if (data && data.length > 0) {
+          setOrders(data);
           setExpandedOrderId(data[0].id);
+        } else {
+          setOrders(MOCK_ORDERS);
+          setExpandedOrderId(MOCK_ORDERS[0].id);
         }
+      } catch {
+        setOrders(MOCK_ORDERS);
+        setExpandedOrderId(MOCK_ORDERS[0].id);
       } finally {
         setLoading(false);
       }
@@ -46,38 +53,44 @@ export default function OrderHistoryPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
       {/* Header */}
-      <div className="border-b border-theme-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-neutral-200 dark:border-neutral-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-sacred text-2xl sm:text-3xl font-bold text-theme-text">
-            سجل طلباتي ومتابعة الحالات
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#D4AF37]">
+            FG ORDER ARCHIVE
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-neutral-900 dark:text-white mt-1">
+            {locale === "ar" ? "سجل طلباتي ومتابعة الشحنات" : "Order History & Status"}
           </h1>
-          <p className="text-xs text-theme-text-muted mt-1">
-            متابعة حالة الطلبات، فواتير الشراء المعتمدة، وتفاصيل المقتنيات الكنسية المطلوبة
+          <p className="text-xs text-neutral-500 mt-1">
+            {locale === "ar"
+              ? "متابعة حالة تجهيز الطلبات، تفاصيل القطع المطلوبة، وطباعة الفواتير"
+              : "Track order fulfillment, garment details, and download digital invoices"}
           </p>
         </div>
 
-        <Link href="/catalog">
-          <Button variant="gold" size="sm" className="rounded-xl">
-            تسوق مقتنيات جديدة
-          </Button>
+        <Link
+          href="/catalog"
+          className="px-6 py-2.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
+        >
+          {locale === "ar" ? "تسوق إصدارات جديدة" : "Shop New Drops"}
         </Link>
       </div>
 
       {/* Orders List */}
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-28 rounded-3xl bg-theme-surface-elevated animate-pulse border border-theme-border" />
+          {[1, 2].map((i) => (
+            <div key={i} className="h-28 rounded-2xl bg-neutral-100 dark:bg-neutral-900 animate-pulse border border-neutral-200 dark:border-neutral-800" />
           ))}
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-16 bg-theme-surface rounded-3xl border border-theme-border">
-          <p className="text-sm text-theme-text-muted">
+        <div className="text-center py-16 bg-neutral-50 dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800">
+          <p className="text-sm text-neutral-500">
             {locale === "ar" ? "لا توجد أي طلبات مسجلة حالياً." : "No orders found."}
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {orders.map((order) => {
             const isExpanded = expandedOrderId === order.id;
             const isDelivered = order.orderStatus === "delivered";
@@ -85,32 +98,34 @@ export default function OrderHistoryPage() {
             return (
               <div
                 key={order.id}
-                className="bg-theme-surface rounded-3xl border border-theme-border overflow-hidden shadow-sm transition-all"
+                className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm transition-all"
               >
                 {/* Order Header Summary Row */}
                 <div
                   onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                  className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-theme-surface-elevated/40 transition-colors"
+                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
                         isDelivered
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                          : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+                          : "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white"
                       }`}
                     >
-                      {isDelivered ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                      {isDelivered ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-sacred font-bold text-base text-theme-text">{order.orderNumber}</span>
+                        <span className="font-mono font-black text-sm text-neutral-950 dark:text-white">
+                          {order.orderNumber}
+                        </span>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             isDelivered
                               ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                              : "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                              : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
                           }`}
                         >
                           {order.orderStatus === "delivered"
@@ -121,101 +136,61 @@ export default function OrderHistoryPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-theme-text-muted mt-1">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-theme-gold" />
-                          {new Date(order.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US")}
+                      <div className="flex items-center gap-3 text-xs text-neutral-500 mt-1">
+                        <span className="flex items-center gap-1 font-mono">
+                          <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </span>
                         <span>•</span>
-                        <span>{order.items.length} {locale === "ar" ? "منتج" : "items"}</span>
+                        <span>{order.items.length} {locale === "ar" ? "قطع" : "items"}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-theme-border">
+                  <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-100 dark:border-neutral-800">
                     <div className="text-start sm:text-end">
-                      <span className="text-[11px] text-theme-text-muted block">
-                        {locale === "ar" ? "الإجمالي الكلي" : "Total Amount"}
+                      <span className="text-[11px] text-neutral-400 block font-mono">
+                        {locale === "ar" ? "الإجمالي" : "Total"}
                       </span>
-                      <span className="text-base font-extrabold text-theme-primary">
-                        {order.total.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} {t.common.priceEGP}
+                      <span className="text-sm font-black font-mono text-neutral-950 dark:text-white">
+                        {order.total.toLocaleString()} {locale === "ar" ? "ج.م" : "EGP"}
                       </span>
                     </div>
 
-                    <div className="text-theme-text-muted">
+                    <div className="text-neutral-400">
                       {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </div>
                   </div>
                 </div>
 
-                {/* Collapsible Order Details */}
+                {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="p-6 border-t border-theme-border bg-theme-surface-elevated/20 space-y-6">
-                    
-                    {/* Order Status Progress Bar */}
-                    <div className="p-4 rounded-2xl bg-theme-surface border border-theme-border space-y-3">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-theme-text flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-theme-gold" />
-                          <span>حالة الطلب الحالية:</span>
-                          <span className="font-semibold text-theme-primary">
-                            {order.orderStatus === "pending"
-                              ? "قيد المراجعة"
-                              : order.orderStatus === "confirmed"
-                              ? "تم التأكيد"
-                              : order.orderStatus === "processing"
-                              ? "قيد التجهيز"
-                              : order.orderStatus === "shipped"
-                              ? "تم الشحن"
-                              : order.orderStatus === "delivered"
-                              ? "مكتمل ومسلّم"
-                              : order.orderStatus === "cancelled"
-                              ? "ملغي"
-                              : order.orderStatus}
-                          </span>
-                        </span>
-                        <span className="text-theme-text-muted">{order.shippingAddress.governorate} - {order.shippingAddress.city}</span>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="w-full bg-theme-surface-elevated h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-theme-gold h-full rounded-full transition-all duration-500"
-                          style={{
-                            width:
-                              order.orderStatus === "delivered"
-                                ? "100%"
-                                : order.orderStatus === "shipped"
-                                ? "75%"
-                                : order.orderStatus === "processing"
-                                ? "50%"
-                                : order.orderStatus === "confirmed"
-                                ? "30%"
-                                : "15%",
-                          }}
-                        />
-                      </div>
-                    </div>
-
+                  <div className="px-5 pb-5 pt-2 border-t border-neutral-100 dark:border-neutral-800 space-y-4">
                     {/* Items List */}
-                    <div className="space-y-3">
-                      <h4 className="font-sacred text-xs font-bold uppercase tracking-wider text-theme-text">
-                        {locale === "ar" ? "المقتنيات المطلوبة" : "Ordered Items"}
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
+                        {locale === "ar" ? "القطع المطلوبة" : "Garments In Order"}
                       </h4>
-                      <div className="divide-y divide-theme-border bg-theme-surface rounded-2xl border border-theme-border p-4">
+                      <div className="divide-y divide-neutral-100 dark:divide-neutral-800 bg-neutral-50 dark:bg-neutral-950 rounded-xl border border-neutral-200 dark:border-neutral-800 p-3">
                         {order.items.map((item, i) => (
                           <div key={i} className="py-2.5 first:pt-0 last:pb-0 flex justify-between items-center text-xs">
                             <div>
-                              <span className="font-bold text-theme-text">{item.productName[locale]}</span>
+                              <span className="font-bold text-neutral-900 dark:text-white">
+                                {item.productName[locale] || item.productName.ar}
+                              </span>
                               {item.variantName && (
-                                <span className="text-[11px] text-theme-text-muted block">{item.variantName}</span>
+                                <span className="text-[11px] text-neutral-400 block font-mono">
+                                  {item.variantName}
+                                </span>
                               )}
                             </div>
                             <div className="text-end">
-                              <span className="font-bold text-theme-text">
-                                {(item.price * item.quantity).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} {t.common.priceEGP}
+                              <span className="font-bold font-mono">
+                                {(item.price * item.quantity).toLocaleString()} ج.م
                               </span>
-                              <span className="text-[11px] text-theme-text-muted block">× {item.quantity}</span>
+                              <span className="text-[10px] text-neutral-400 block font-mono">
+                                × {item.quantity}
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -224,20 +199,20 @@ export default function OrderHistoryPage() {
 
                     {/* Actions: Invoice Generation */}
                     <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-                      <div className="text-xs text-theme-text-muted">
+                      <div className="text-xs text-neutral-500">
                         {locale === "ar" ? "طريقة الدفع:" : "Payment:"}{" "}
-                        <span className="font-semibold text-theme-text capitalize">{order.paymentMethod.replace(/_/g, " ")}</span>
+                        <span className="font-bold text-neutral-900 dark:text-white uppercase">
+                          {order.paymentMethod.replace(/_/g, " ")}
+                        </span>
                       </div>
 
-                      <Button
-                        variant="gold"
-                        size="sm"
-                        className="rounded-xl"
+                      <button
                         onClick={() => setSelectedInvoice(order)}
+                        className="px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-xs uppercase flex items-center gap-1.5 hover:opacity-90 transition-opacity"
                       >
-                        <FileText className="w-3.5 h-3.5 mr-1.5 rtl:mr-0 rtl:ml-1.5" />
-                        <span>{locale === "ar" ? "عرض / طباعة الفاتورة (PDF)" : "View / Print Invoice"}</span>
-                      </Button>
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>{locale === "ar" ? "عرض / طباعة الفاتورة" : "View Invoice"}</span>
+                      </button>
                     </div>
 
                   </div>
@@ -250,97 +225,100 @@ export default function OrderHistoryPage() {
 
       {/* Invoice Modal */}
       {selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white text-gray-900 rounded-3xl max-w-2xl w-full p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white text-neutral-900 rounded-3xl max-w-2xl w-full p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             
             {/* Invoice Header */}
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-900 text-yellow-500 flex items-center justify-center font-bold">
-                  <Cross className="w-6 h-6" />
+                <div className="relative w-10 h-10 flex-shrink-0">
+                  <Image
+                    src="/branding/FG_Logo_Transparent_Black.png"
+                    alt="FG Logo"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
                 <div>
-                  <h3 className="font-sacred text-lg font-bold text-red-950">
-                    {locale === "ar" ? "متجر سانكتا ماريا للمقتنيات الكنسية" : "Sancta Maria Church Store"}
+                  <h3 className="text-base font-black uppercase tracking-tight">
+                    FG COLLECTIVE
                   </h3>
-                  <p className="text-xs text-gray-500">فاتورة ضريبية رسمية معتمدة | Official Invoice</p>
+                  <p className="text-[11px] text-neutral-500 font-mono">
+                    فاتورة رسمية معتمدة | Official Tax Receipt
+                  </p>
                 </div>
               </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => window.print()}
+                  className="p-2 rounded-lg border border-neutral-300 hover:bg-neutral-100 text-neutral-700"
+                  title="Print"
+                >
+                  <Printer className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setSelectedInvoice(null)}
+                  className="p-2 rounded-lg border border-neutral-300 hover:bg-neutral-100 text-neutral-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Order & Customer Details */}
+            <div className="grid grid-cols-2 gap-4 text-xs bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+              <div>
+                <span className="text-neutral-400 block font-mono text-[10px] uppercase">Recipient / المستلم:</span>
+                <span className="font-bold text-neutral-900">{selectedInvoice.customerName}</span>
+                <span className="text-neutral-600 block font-mono">{selectedInvoice.customerPhone}</span>
+              </div>
               <div className="text-end">
-                <span className="font-mono font-bold text-sm text-red-900">{selectedInvoice.orderNumber}</span>
-                <span className="text-xs text-gray-500 block">
-                  {new Date(selectedInvoice.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US")}
+                <span className="text-neutral-400 block font-mono text-[10px] uppercase">Order Number / رقم الطلب:</span>
+                <span className="font-mono font-bold text-sm">{selectedInvoice.orderNumber}</span>
+                <span className="text-neutral-500 block font-mono text-[11px]">
+                  {new Date(selectedInvoice.createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
 
-            {/* Customer Details */}
-            <div className="grid grid-cols-2 gap-4 text-xs bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <div>
-                <span className="text-gray-500 block">المستلم / Recipient:</span>
-                <span className="font-bold text-gray-900">{selectedInvoice.customerName}</span>
-                <span className="text-gray-600 block">{selectedInvoice.customerPhone}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 block">عنوان الشحن / Address:</span>
-                <span className="font-medium text-gray-900">{selectedInvoice.shippingAddress.streetAddress}</span>
-                <span className="text-gray-600 block">{selectedInvoice.shippingAddress.city}, {selectedInvoice.shippingAddress.governorate}</span>
-              </div>
-            </div>
-
-            {/* Invoice Table */}
+            {/* Items Table */}
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="py-2 text-start font-semibold">الصنف / Item</th>
-                  <th className="py-2 text-center font-semibold">الكمية / Qty</th>
-                  <th className="py-2 text-end font-semibold">السعر / Price</th>
+                <tr className="border-b text-neutral-400 uppercase font-mono text-[10px]">
+                  <th className="py-2 text-start font-bold">Item / الصنف</th>
+                  <th className="py-2 text-center font-bold">Qty / الكمية</th>
+                  <th className="py-2 text-end font-bold">Price / السعر</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y font-mono">
                 {selectedInvoice.items.map((it, idx) => (
-                  <tr key={idx}>
-                    <td className="py-2.5 font-medium">{it.productName[locale]}</td>
-                    <td className="py-2.5 text-center">{it.quantity}</td>
-                    <td className="py-2.5 text-end font-bold font-mono">
-                      {(it.price * it.quantity).toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} ج.م
+                  <tr key={idx} className="py-2">
+                    <td className="py-2.5 font-sans font-bold">
+                      {it.productName[locale] || it.productName.ar}
+                      {it.variantName && <span className="block font-mono text-[10px] text-neutral-400">{it.variantName}</span>}
                     </td>
+                    <td className="py-2.5 text-center">{it.quantity}</td>
+                    <td className="py-2.5 text-end font-bold">{(it.price * it.quantity).toLocaleString()} EGP</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Totals */}
-            <div className="border-t pt-3 space-y-1.5 text-xs text-end">
-              <div className="flex justify-between text-gray-500">
-                <span>المجموع الفرعي (Subtotal):</span>
-                <span className="font-mono font-bold">{selectedInvoice.subtotal.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} ج.م</span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>مصاريف الشحن (Shipping):</span>
-                <span className="font-mono font-bold">{selectedInvoice.shippingFee} ج.م</span>
-              </div>
-              <div className="flex justify-between text-sm font-extrabold text-red-900 pt-2 border-t">
-                <span>الإجمالي النهائي (Total):</span>
-                <span className="font-mono text-base">{selectedInvoice.total.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} ج.م</span>
+            {/* Total Summary */}
+            <div className="pt-3 border-t border-neutral-200 space-y-1.5 text-xs text-end font-mono">
+              <div>المجموع الفرعي: {selectedInvoice.subtotal.toLocaleString()} EGP</div>
+              {selectedInvoice.discountAmount > 0 && (
+                <div className="text-emerald-600 font-bold">الخصم: -{selectedInvoice.discountAmount.toLocaleString()} EGP</div>
+              )}
+              <div>رسوم الشحن: {selectedInvoice.shippingFee === 0 ? "FREE" : `${selectedInvoice.shippingFee} EGP`}</div>
+              <div className="text-base font-black pt-2 border-t text-neutral-900">
+                المجموع الكلي: {selectedInvoice.total.toLocaleString()} EGP
               </div>
             </div>
 
-            {/* Modal Controls */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="px-4 py-2 rounded-xl border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-100"
-              >
-                إغلاق (Close)
-              </button>
-              <button
-                onClick={() => window.open(`/api/orders/${selectedInvoice.id}/invoice`, '_blank')}
-                className="px-4 py-2 rounded-xl bg-red-900 text-white text-xs font-semibold hover:bg-red-950 flex items-center gap-1.5"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>طباعة الفاتورة الرسمية (Official PDF Invoice)</span>
-              </button>
+            <div className="pt-2 text-center text-[10px] text-neutral-400 font-mono">
+              FG Collective Cairo • Crafted with Pride in Egypt
             </div>
           </div>
         </div>

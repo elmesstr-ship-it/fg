@@ -40,37 +40,37 @@ class AuthStore {
   }
 
   private seedInitialUsers() {
-    // 1. Initial Verified Customer
-    const custHash = hashPassword("Customer@1234");
+    // 1. Initial Demo Customer Account
+    const custHash = hashPassword("DemoUser123!");
     const custUser: UserAccount = {
       id: "usr-cust-01",
-      fullName: "مينا رفيق جرجس",
-      email: "mina.girgis@example.com",
+      fullName: "عمر الشريف",
+      email: "demo.user@example.com",
       passwordHash: custHash.hash,
       salt: custHash.salt,
       phone: "01201234567",
-      parishName: "كنيسة السيدة العذراء مريم - المعادي",
+      parishName: "FG Collective Club Member",
       role: "USER",
       isEmailVerified: true,
       isPhoneVerified: true,
-      createdAt: "2025-11-10T08:00:00Z",
+      createdAt: "2026-01-10T08:00:00Z",
     };
     this.users.set(custUser.email.toLowerCase(), custUser);
 
-    // 2. Initial Protected Admin Account
-    const adminHash = hashPassword("Admin@Holy2026");
+    // 2. Initial Demo Admin Account
+    const adminHash = hashPassword("DemoAdmin123!");
     const adminUser: UserAccount = {
       id: "usr-admin-01",
-      fullName: "مشرف النظام الإداري (رئيسي)",
-      email: "admin@sanctamaria-store.com",
+      fullName: "إدارة إف جي كوليكتيف",
+      email: "demo.admin@example.com",
       passwordHash: adminHash.hash,
       salt: adminHash.salt,
       phone: "01000000001",
-      parishName: "المقر الإداري - سانكتا ماريا",
+      parishName: "FG Headquarters",
       role: "ADMIN",
       isEmailVerified: true,
       isPhoneVerified: true,
-      createdAt: "2025-01-01T00:00:00Z",
+      createdAt: "2026-01-01T00:00:00Z",
     };
     this.users.set(adminUser.email.toLowerCase(), adminUser);
   }

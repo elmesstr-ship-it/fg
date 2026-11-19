@@ -1,23 +1,32 @@
 import { create } from "zustand";
+import { SeasonalThemeId } from "@/types/theme";
 
-export type SeasonalVisualMode = "default" | "christmas" | "halloween";
-export type ChristmasSubMode = "subtle" | "festive";
+export type SeasonalVisualMode = 
+  | "default" 
+  | "summer" 
+  | "winter" 
+  | "ramadan" 
+  | "eid_fitr" 
+  | "eid_adha" 
+  | "christmas";
+
+export type FestiveSubMode = "subtle" | "festive";
 
 interface SeasonalVisualState {
   currentMode: SeasonalVisualMode;
-  christmasSubMode: ChristmasSubMode;
+  festiveSubMode: FestiveSubMode;
   setMode: (mode: SeasonalVisualMode) => void;
-  setChristmasSubMode: (subMode: ChristmasSubMode) => void;
+  setFestiveSubMode: (subMode: FestiveSubMode) => void;
 }
 
 export const useSeasonalVisualStore = create<SeasonalVisualState>((set) => ({
   currentMode: "default",
-  christmasSubMode: "subtle",
+  festiveSubMode: "subtle",
   setMode: (mode) => {
     set({ currentMode: mode });
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-seasonal-mode", mode);
     }
   },
-  setChristmasSubMode: (subMode) => set({ christmasSubMode: subMode }),
+  setFestiveSubMode: (subMode) => set({ festiveSubMode: subMode }),
 }));

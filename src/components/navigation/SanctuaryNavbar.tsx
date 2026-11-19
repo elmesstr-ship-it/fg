@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Sparkles,
-  TreePine,
+  Sun,
   Moon,
   ChevronDown,
   ShoppingBag,
@@ -13,344 +13,418 @@ import {
   Search,
   Menu,
   X,
-  Bell,
   User,
+  ShieldAlert,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import { useSeasonalVisualStore, SeasonalVisualMode } from "@/store/seasonalVisualStore";
+import { useAppStore } from "@/store/useAppStore";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { MOCK_CATEGORIES } from "@/lib/mockData";
+import { useAuthStore } from "@/store/useAuthStore";
+import { translations } from "@/config/i18n";
+import { SEASONAL_THEMES } from "@/config/themes";
 
 export function SanctuaryNavbar() {
-  const { currentMode, christmasSubMode, setMode, setChristmasSubMode } = useSeasonalVisualStore();
+  const { currentMode, setMode } = useSeasonalVisualStore();
+  const { locale, toggleLocale, themeMode, toggleThemeMode, seasonalTheme, setSeasonalTheme } = useAppStore();
+  const t = translations[locale];
+
   const cartItems = useCartStore((state) => state.items);
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const { items: wishlistItems } = useWishlistStore();
+  const totalCartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const { user, isAuthenticated, isAdmin, loginAsDemoUser, loginAsDemoAdmin, logout } = useAuthStore();
+
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSelectSeasonalTheme = (key: SeasonalVisualMode) => {
+    setMode(key);
+    setSeasonalTheme(key);
+    setIsThemeMenuOpen(false);
+  };
+
+  const navLinks = [
+    { label: t.navigation.newDrops, href: "/catalog?drop=new", highlight: true },
+    { label: t.navigation.hoodies, href: "/catalog?category=cat-hoodies" },
+    { label: t.navigation.tshirts, href: "/catalog?category=cat-tees" },
+    { label: t.navigation.pants, href: "/catalog?category=cat-pants" },
+    { label: t.navigation.outerwear, href: "/catalog?category=cat-outerwear" },
+    { label: t.navigation.accessories, href: "/catalog?category=cat-accessories" },
+  ];
+
+  const seasonalOptions: { id: SeasonalVisualMode; labelAr: string; labelEn: string; color: string }[] = [
+    { id: "default", labelAr: "المظهر الفاخر (Monochrome)", labelEn: "FG Monochrome", color: "#0A0A0A" },
+    { id: "summer", labelAr: "إصدار الصيف (Summer Drop)", labelEn: "Summer Drop", color: "#0284C7" },
+    { id: "winter", labelAr: "إصدار الشتاء (Winter Heavyweight)", labelEn: "Winter Drop", color: "#1E293B" },
+    { id: "ramadan", labelAr: "رمضان المبارك (Ramadan Edition)", labelEn: "Ramadan Edition", color: "#064E3B" },
+    { id: "eid_fitr", labelAr: "عيد الفطر السعيد", labelEn: "Eid Al-Fitr", color: "#15803D" },
+    { id: "eid_adha", labelAr: "عيد الأضحى التراثي", labelEn: "Eid Al-Adha", color: "#991B1B" },
+    { id: "christmas", labelAr: "إصدار رأس السنة والميلاد", labelEn: "Holiday Drop", color: "#881337" },
+  ];
 
   return (
     <>
-      {/* Top Liturgical Announcement Banner */}
-      <div className="relative z-50 bg-[#1E2229] text-[#FFFBF0] text-xs py-2 px-4 border-b border-[#F5A623]/30 transition-colors duration-500 overflow-hidden">
-        {/* Subtle festive background illumination */}
-        {currentMode === "christmas" && (
-          <div className="absolute inset-0 bg-gradient-to-r from-red-950 via-emerald-950 to-red-950 opacity-90 animate-pulse pointer-events-none" />
-        )}
-        {currentMode === "halloween" && (
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-950 via-orange-950 to-purple-950 opacity-90 pointer-events-none" />
-        )}
-
-        <div className="max-w-7xl mx-auto flex items-center justify-between relative z-10">
+      {/* 1. TOP ANNOUNCEMENT BAR */}
+      <div className="relative z-50 bg-[#0A0A0A] text-[#FAFAFA] text-[12px] py-2 px-4 border-b border-neutral-800 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Announcement Message */}
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-ping" />
-            <p className="font-sacred text-[13px] tracking-wide text-amber-200">
-              {currentMode === "christmas"
-                ? "✨ المجد لله في الأعالي وعلى الأرض السلام — عروض أسبوع الميلاد المجيد متاحة الآن"
-                : currentMode === "halloween"
-                ? "🕯️ موسم الخريف والشموع — خصومات كبرى على الأواني المذبحية والبخور الديري"
-                : "🕊️ متجر الكنيسة (Church Shop): تأسس منذ 35 عاماً لصنع الأواني المذبحية بأعلى جودة وأقل سعر • توصيل داخل وخارج مصر"}
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-ping" />
+            <p className="font-sans font-medium tracking-wide text-neutral-300">
+              {locale === "ar"
+                ? "شحن مجاني لكافة محافظات مصر للطلبات فوق 1500 ج.م • كود خصم FG10"
+                : "Free Shipping across Egypt on orders over 1500 EGP • Use code FG10"}
             </p>
           </div>
 
-          {/* Seasonal Experience Mode Switcher */}
-          <div className="relative">
-            <button
-              onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 border border-[#F5A623]/40 text-[#F5A623] transition-all text-[11px] font-sans font-medium"
-            >
-              {currentMode === "christmas" ? (
-                <>
-                  <TreePine className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>عيد الميلاد ({christmasSubMode === "festive" ? "احتفالي" : "هادئ"})</span>
-                </>
-              ) : currentMode === "halloween" ? (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-orange-400" />
-                  <span>أمسية الخريف</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-[#F5A623]" />
-                  <span>المظهر الذهبي الملكي</span>
-                </>
+          {/* Quick Utility Switchers (Language & Seasonal Mood) */}
+          <div className="flex items-center gap-3">
+            {/* Seasonal Mood Selector */}
+            <div className="relative hidden sm:block">
+              <button
+                onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 transition-all text-[11px]"
+              >
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                <span>
+                  {seasonalOptions.find((o) => o.id === currentMode)?.[
+                    locale === "ar" ? "labelAr" : "labelEn"
+                  ] || "FG Monochrome"}
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-70" />
+              </button>
+
+              {isThemeMenuOpen && (
+                <div className="absolute left-0 mt-2 w-60 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-200 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 py-1.5 border-b border-neutral-800">
+                    {locale === "ar" ? "اختر الطابع الموسمي" : "Select Seasonal Drop"}
+                  </div>
+                  {seasonalOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => handleSelectSeasonalTheme(opt.id)}
+                      className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-neutral-900 transition-colors ${
+                        currentMode === opt.id ? "bg-neutral-900 text-[#D4AF37] font-bold" : ""
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: opt.color }} />
+                        {locale === "ar" ? opt.labelAr : opt.labelEn}
+                      </span>
+                      {currentMode === opt.id && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                    </button>
+                  ))}
+                </div>
               )}
-              <ChevronDown className="w-3 h-3 opacity-80" />
+            </div>
+
+            {/* Language Switcher Toggle */}
+            <button
+              onClick={toggleLocale}
+              className="px-2 py-0.5 rounded text-[11px] font-mono font-bold tracking-wider bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 transition-colors"
+              title="Toggle Language"
+            >
+              {locale === "ar" ? "EN" : "العربية"}
             </button>
-
-            {/* Dropdown Menu */}
-            {isThemeMenuOpen && (
-              <div className="absolute left-0 mt-2 w-64 rounded-xl bg-white shadow-2xl border border-stone-200 text-stone-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider px-3 py-1.5 border-b border-stone-100">
-                  اختيار الطابع الموسمي التفاعلي
-                </div>
-                <button
-                  onClick={() => {
-                    setMode("default");
-                    setIsThemeMenuOpen(false);
-                  }}
-                  className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-amber-50/80 transition-colors ${
-                    currentMode === "default" ? "bg-amber-50 text-[#D98E18] font-bold" : ""
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#F5A623]" />
-                    المظهر الذهبي الأصيل (Church Shop Gold)
-                  </span>
-                  {currentMode === "default" && <span className="text-[10px] text-[#F5A623]">نشط</span>}
-                </button>
-
-                <div className="mt-1 pt-1 border-t border-stone-100">
-                  <button
-                    onClick={() => {
-                      setMode("christmas");
-                      setChristmasSubMode("subtle");
-                      setIsThemeMenuOpen(false);
-                    }}
-                    className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-emerald-50/80 transition-colors ${
-                      currentMode === "christmas" && christmasSubMode === "subtle"
-                        ? "bg-emerald-50 text-emerald-800 font-bold"
-                        : ""
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-                      عيد الميلاد — وضع هادئ (ثلوج خفيفة)
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setMode("christmas");
-                      setChristmasSubMode("festive");
-                      setIsThemeMenuOpen(false);
-                    }}
-                    className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-red-50/80 transition-colors ${
-                      currentMode === "christmas" && christmasSubMode === "festive"
-                        ? "bg-red-50 text-red-800 font-bold"
-                        : ""
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-600" />
-                      عيد الميلاد — وضع احتفالي كامل
-                    </span>
-                  </button>
-                </div>
-
-                <div className="mt-1 pt-1 border-t border-stone-100">
-                  <button
-                    onClick={() => {
-                      setMode("halloween");
-                      setIsThemeMenuOpen(false);
-                    }}
-                    className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-orange-50/80 transition-colors ${
-                      currentMode === "halloween" ? "bg-purple-50 text-purple-900 font-bold" : ""
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-orange-600" />
-                      أمسية الخريف والشموع (Autumn Vigil)
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Main Luxury Header */}
-      <header className="sticky top-0 z-40 bg-[#FCFBF7]/95 backdrop-blur-md border-b border-[#E8E2D2] transition-colors duration-500">
+      {/* 2. MAIN NAVBAR */}
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-18 lg:h-20">
             {/* Mobile Menu Button */}
             <div className="flex items-center lg:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-stone-700 hover:text-[#781d22] transition-colors"
-                aria-label="Toggle menu"
+                className="p-2 rounded-lg text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                aria-label="Toggle Navigation Menu"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
 
-            {/* Brand Logo & Editorial Typography */}
+            {/* Brand Logo & Name */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-[#F5A623]/30 bg-white shadow-sm flex items-center justify-center p-0.5">
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 transition-transform group-hover:scale-105">
                 <Image
-                  src="/logo.png"
-                  alt="Church Shop Logo"
-                  width={48}
-                  height={48}
-                  className="object-contain group-hover:scale-105 transition-transform"
+                  src={
+                    mounted && themeMode === "dark"
+                      ? "/branding/FG_Logo_Transparent_White.png"
+                      : "/branding/FG_Logo_Transparent_Black.png"
+                  }
+                  alt="FG Collective Logo"
+                  fill
+                  className="object-contain"
+                  priority
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-sacred text-2xl font-black tracking-wide text-[#1E2229] group-hover:text-[#F5A623] transition-colors leading-tight">
-                  CHURCH SHOP
+                <span className="text-xl sm:text-2xl font-black tracking-tighter uppercase text-neutral-950 dark:text-white font-sans">
+                  FG COLLECTIVE
                 </span>
-                <span className="text-[11px] font-bold text-[#E59819] -mt-0.5">
-                  متجر الكنيسة • خبرة 35 عاماً في صياغة الأواني
+                <span className="text-[9px] tracking-widest text-neutral-500 uppercase -mt-1 font-mono">
+                  CAIRO • EST. 2026
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-8">
-              <Link
-                href="/"
-                className="text-sm font-medium text-stone-800 hover:text-[#781d22] transition-colors relative py-2"
-              >
-                الرئيسية
-              </Link>
-
-              {/* Department Megamenu Trigger */}
-              <div
-                className="relative"
-                onMouseEnter={() => setIsCategoryMenuOpen(true)}
-                onMouseLeave={() => setIsCategoryMenuOpen(false)}
-              >
-                <button className="flex items-center gap-1.5 text-sm font-medium text-stone-800 hover:text-[#781d22] transition-colors py-2">
-                  <span>الأقسام الكنسية</span>
-                  <ChevronDown className="w-4 h-4 opacity-60" />
-                </button>
-
-                {/* Dropdown Panel */}
-                {isCategoryMenuOpen && (
-                  <div className="absolute top-full -right-20 w-[640px] bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl border border-stone-200/80 p-6 z-50 animate-in fade-in duration-200 grid grid-cols-2 gap-4">
-                    {MOCK_CATEGORIES.map((cat) => (
-                      <Link
-                        key={cat.id}
-                        href={`/catalog?category=${cat.slug}`}
-                        className="flex items-start gap-4 p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-all group"
-                      >
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-stone-200">
-                          <Image
-                            src={cat.heroImage}
-                            alt={cat.name.ar}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-stone-900 group-hover:text-[#781d22] transition-colors font-sacred">
-                            {cat.name.ar}
-                          </h4>
-                          <p className="text-xs text-stone-500 line-clamp-1 mt-0.5">
-                            {cat.tagline.ar}
-                          </p>
-                          <span className="inline-block text-[10px] text-[#c5a059] font-medium mt-1">
-                            {cat.itemCount} تحفة متوفرة
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <Link
-                href="/catalog"
-                className="text-sm font-medium text-stone-800 hover:text-[#781d22] transition-colors relative py-2"
-              >
-                المعرض الكامل
-              </Link>
-              <Link
-                href="/support"
-                className="text-sm font-medium text-stone-800 hover:text-[#781d22] transition-colors relative py-2"
-              >
-                خدمة الرعايا
-              </Link>
+            <nav className="hidden lg:flex items-center gap-7">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-xs uppercase font-bold tracking-wider transition-colors relative py-1 group ${
+                    link.highlight
+                      ? "text-[#D4AF37] font-black"
+                      : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                  <span className="absolute bottom-0 inset-x-0 h-0.5 bg-black dark:bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-center" />
+                </Link>
+              ))}
             </nav>
 
-            {/* Desktop Quick Actions */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              <Link
-                href="/catalog"
-                className="p-2 text-stone-600 hover:text-[#781d22] transition-colors"
-                title="البحث في الكتالوج"
+            {/* Header Right Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Search Toggle */}
+              <button
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="p-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                aria-label="Search"
               >
                 <Search className="w-5 h-5" />
-              </Link>
+              </button>
 
+              {/* Theme Mode Toggle (Light/Dark) */}
+              <button
+                onClick={toggleThemeMode}
+                className="p-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                aria-label="Toggle Light/Dark Theme"
+              >
+                {mounted && themeMode === "dark" ? (
+                  <Sun className="w-5 h-5 text-amber-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-neutral-700" />
+                )}
+              </button>
+
+              {/* Wishlist Link */}
               <Link
                 href="/wishlist"
-                className="p-2 text-stone-600 hover:text-[#781d22] transition-colors relative"
-                title="قائمة الأمنيات والمباركات"
+                className="p-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white relative transition-colors"
+                aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5" />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#781d22] text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+                  <span className="absolute 1 top-1 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#0A0A0A] dark:bg-white text-white dark:text-black text-[10px] font-bold flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
               </Link>
 
+              {/* Cart Bag Link */}
               <Link
                 href="/cart"
-                className="p-2 text-stone-600 hover:text-[#781d22] transition-colors relative group"
-                title="سلة المشتريات"
+                className="p-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white relative transition-colors"
+                aria-label="Shopping Bag"
               >
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-100/80 group-hover:bg-[#781d22]/10 transition-colors border border-stone-200">
-                  <ShoppingBag className="w-5 h-5 text-[#781d22]" />
-                  <span className="text-xs font-bold text-stone-800 group-hover:text-[#781d22]">
-                    {totalItems > 0 ? `${totalItems} قطع` : "فارغة"}
+                <ShoppingBag className="w-5 h-5" />
+                {totalCartCount > 0 && (
+                  <span className="absolute top-1 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#D4AF37] text-black text-[10px] font-black flex items-center justify-center">
+                    {totalCartCount}
                   </span>
-                </div>
+                )}
               </Link>
 
-              <Link
-                href="/login"
-                className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-700 hover:text-[#781d22] p-2"
-              >
-                <User className="w-4 h-4" />
-                <span>تسجيل الدخول</span>
-              </Link>
-            </div>
-          </div>
-        </div>
+              {/* User Account Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="p-2 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-black dark:hover:border-white transition-colors"
+                  aria-label="User Account"
+                >
+                  <User className="w-4 h-4" />
+                </button>
 
-        {/* Mobile Slide-down Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-stone-200 bg-[#FCFBF7] p-4 space-y-3 animate-in slide-in-from-top-4 duration-300">
-            <Link
-              href="/"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-sm font-semibold text-stone-800 p-2 rounded-lg hover:bg-stone-100"
-            >
-              الرئيسية
-            </Link>
-            <Link
-              href="/catalog"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-sm font-semibold text-stone-800 p-2 rounded-lg hover:bg-stone-100"
-            >
-              المعرض الشامل للتحف والأيقونات
-            </Link>
-            <div className="py-2 border-y border-stone-200">
-              <span className="text-xs font-bold text-stone-400 block px-2 mb-2">الأقسام الكنسية</span>
-              <div className="grid grid-cols-2 gap-2">
-                {MOCK_CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/catalog?category=${cat.slug}`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-xs text-stone-700 p-2 rounded-lg hover:bg-stone-100 line-clamp-1"
-                  >
-                    {cat.name.ar}
-                  </Link>
-                ))}
+                {isUserMenuOpen && (
+                  <div className="absolute left-0 sm:left-auto sm:right-0 mt-3 w-64 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-100 shadow-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {isAuthenticated && user ? (
+                      <div className="space-y-2">
+                        <div className="pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                          <p className="text-xs font-bold text-neutral-900 dark:text-white">{user.fullName}</p>
+                          <p className="text-[11px] text-neutral-500 font-mono">{user.email}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
+                            {user.role === "ADMIN" ? "👑 مسؤول النظام" : "عميل VIP"}
+                          </span>
+                        </div>
+
+                        {isAdmin && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between bg-[#0A0A0A] dark:bg-white text-white dark:text-black font-bold hover:opacity-90"
+                          >
+                            <span>لوحة تحكم المسؤول</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+
+                        <Link
+                          href="/orders"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="w-full text-right px-3 py-1.5 text-xs rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center justify-between"
+                        >
+                          <span>طلباتي السابقة</span>
+                        </Link>
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="w-full text-right px-3 py-1.5 text-xs rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center justify-between"
+                        >
+                          <span>الملف الشخصي والعناوين</span>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full text-right px-3 py-1.5 text-xs rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 font-semibold"
+                        >
+                          تسجيل الخروج
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider pb-1 border-b border-neutral-100 dark:border-neutral-800">
+                          تسجيل الدخول السريع (Demo Mode)
+                        </div>
+                        <button
+                          onClick={() => {
+                            loginAsDemoUser();
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full py-2 px-3 text-xs rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 font-semibold text-right flex items-center justify-between transition-colors"
+                        >
+                          <span>⚡ دخول كعميل (Demo User)</span>
+                          <span className="text-[10px] text-neutral-500">عمر الشريف</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            loginAsDemoAdmin();
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full py-2 px-3 text-xs rounded-lg bg-black dark:bg-white text-white dark:text-black hover:opacity-90 font-bold text-right flex items-center justify-between transition-opacity"
+                        >
+                          <span>⚡ دخول كمسؤول (Demo Admin)</span>
+                          <span className="text-[10px] opacity-75">إدارة FG</span>
+                        </button>
+                        <div className="pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                          <Link
+                            href="/login"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="block text-center text-xs text-neutral-600 dark:text-neutral-400 hover:underline py-1"
+                          >
+                            صفحة تسجيل الدخول العادية
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-            <Link
-              href="/support"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-sm font-semibold text-stone-800 p-2 rounded-lg hover:bg-stone-100"
-            >
-              خدمة الرعايا والاستفسارات
-            </Link>
+          </div>
+
+          {/* Search Dropdown / Bar */}
+          {isSearchOpen && (
+            <div className="py-3 border-t border-neutral-200 dark:border-neutral-800 animate-in fade-in slide-in-from-top-1 duration-150">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    window.location.href = `/catalog?search=${encodeURIComponent(searchQuery)}`;
+                  }
+                }}
+                className="relative"
+              >
+                <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t.common.searchPlaceholder}
+                  className="w-full pr-10 pl-4 py-2 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                  autoFocus
+                />
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* 3. MOBILE SLIDE-OUT MENU */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 top-18 bg-black/60 z-50 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-neutral-950 w-4/5 max-w-sm h-full p-6 space-y-6 shadow-2xl border-l border-neutral-200 dark:border-neutral-800 overflow-y-auto">
+              <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800">
+                <span className="text-lg font-black uppercase tracking-wider">FG Navigation</span>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <nav className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm uppercase font-bold tracking-wider py-1.5 border-b border-neutral-100 dark:border-neutral-900 text-neutral-800 dark:text-neutral-200"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-neutral-500">اللغة / Language</span>
+                  <button
+                    onClick={toggleLocale}
+                    className="px-3 py-1 rounded bg-neutral-100 dark:bg-neutral-900 font-mono text-xs font-bold"
+                  >
+                    {locale === "ar" ? "English" : "العربية"}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-neutral-500">المظهر / Theme</span>
+                  <button
+                    onClick={toggleThemeMode}
+                    className="px-3 py-1 rounded bg-neutral-100 dark:bg-neutral-900 text-xs font-bold flex items-center gap-1.5"
+                  >
+                    {mounted && themeMode === "dark" ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+                    <span>{themeMode === "dark" ? "الوضع الليلي" : "الوضع النهاري"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </header>

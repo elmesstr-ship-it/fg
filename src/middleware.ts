@@ -11,7 +11,7 @@ export function middleware(req: NextRequest) {
     const masterKey = req.headers.get("x-admin-master-key");
 
     // Master key bypasses for automated test suites
-    if (masterKey === "SanctaMariaMasterKey#2026") {
+    if (masterKey === "FGCollectiveMasterKey#2026") {
       return NextResponse.next();
     }
 

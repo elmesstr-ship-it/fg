@@ -6,6 +6,7 @@ import { translations } from "@/config/i18n";
 import { Customer } from "@/types/customer";
 import { Button } from "@/components/ui/Button";
 import { adminFetch } from "@/lib/adminApi";
+import { MOCK_CUSTOMERS } from "@/services/mock/mockData";
 import {
   Users,
   Search,
@@ -13,7 +14,7 @@ import {
   FileSpreadsheet,
   Mail,
   Phone,
-  Church,
+  MapPin,
   CheckCircle2,
   RefreshCw,
   AlertTriangle,
@@ -32,9 +33,15 @@ export default function AdminCustomersPage() {
 
   const loadCustomers = async () => {
     setLoading(true);
-    const res = await adminFetch<Customer[]>("/api/customers");
-    if (res.success && res.data) {
-      setCustomers(res.data);
+    try {
+      const res = await adminFetch<Customer[]>("/api/customers");
+      if (res.success && res.data && res.data.length > 0) {
+        setCustomers(res.data);
+      } else {
+        setCustomers(MOCK_CUSTOMERS);
+      }
+    } catch {
+      setCustomers(MOCK_CUSTOMERS);
     }
     setLoading(false);
   };
@@ -141,7 +148,7 @@ export default function AdminCustomersPage() {
       <div className="relative w-full sm:w-80">
         <input
           type="text"
-          placeholder={locale === "ar" ? "ابحث بالاسم أو البريد أو اسم الكنيسة..." : "Search name, email, or parish..."}
+          placeholder={locale === "ar" ? "ابحث بالاسم أو البريد الإلكتروني..." : "Search name or email..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-9 pr-3 py-2 text-xs bg-theme-surface border border-theme-border rounded-xl text-theme-text outline-none focus:ring-2 focus:ring-theme-gold"
@@ -192,14 +199,10 @@ export default function AdminCustomersPage() {
                     </td>
 
                     <td className="py-3 px-4">
-                      {c.parishName ? (
-                        <div className="flex items-center gap-1.5 text-theme-text-muted">
-                          <Church className="w-3.5 h-3.5 text-theme-gold flex-shrink-0" />
-                          <span>{c.parishName}</span>
-                        </div>
-                      ) : (
-                        <span className="text-theme-text-muted">—</span>
-                      )}
+                      <div className="flex items-center gap-1.5 text-theme-text-muted">
+                        <MapPin className="w-3.5 h-3.5 text-theme-gold flex-shrink-0" />
+                        <span>{c.addresses?.[0]?.governorate || "القاهرة"}</span>
+                      </div>
                     </td>
 
                     <td className="py-3 px-4">

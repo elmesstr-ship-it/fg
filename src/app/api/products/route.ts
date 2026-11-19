@@ -53,8 +53,8 @@ export const POST = apiHandler(
     const created = await db.products.createProduct({
       name: validated.name,
       slug: validated.slug || uniqueSlug,
-      shortDescription: validated.shortDescription || { ar: "صنف كنسي مبارك", en: "Sacred Church Offering" },
-      fullDescription: validated.fullDescription || { ar: "صنف كنسي مبارك", en: "Sacred Church Offering" },
+      shortDescription: validated.shortDescription || { ar: "قطعة ستريت وير حصرية", en: "Exclusive Streetwear Piece" },
+      fullDescription: validated.fullDescription || { ar: "قطعة ستريت وير حصرية مصنعة من أجود الخامات", en: "Exclusive Streetwear Piece crafted from premium materials" },
       categoryId: validated.categoryId,
       categoryName: validated.categoryName || { ar: "قسم عام", en: "General" },
       price: validated.price,

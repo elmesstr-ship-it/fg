@@ -38,7 +38,7 @@ export const useWishlistStore = create<WishlistState>()(
       },
     }),
     {
-      name: "sancta-maria-wishlist",
+      name: "fg-collective-wishlist",
     }
   )
 );

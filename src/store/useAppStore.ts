@@ -6,13 +6,15 @@ import { Locale } from "@/types/locale";
 import { ThemeMode, SeasonalThemeId } from "@/types/theme";
 
 interface AppState {
-  locale: "ar";
+  locale: Locale;
   themeMode: ThemeMode;
   seasonalTheme: SeasonalThemeId;
   isMaintenanceMode: boolean;
   isAdmin: boolean;
-  setLocale: (locale: "ar") => void;
+  setLocale: (locale: Locale) => void;
+  toggleLocale: () => void;
   setThemeMode: (mode: ThemeMode) => void;
+  toggleThemeMode: () => void;
   setSeasonalTheme: (theme: SeasonalThemeId) => void;
   setMaintenanceMode: (enabled: boolean) => void;
   toggleAdminPreview: () => void;
@@ -20,20 +22,28 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       locale: "ar",
       themeMode: "light",
       seasonalTheme: "default",
       isMaintenanceMode: false,
       isAdmin: false,
-      setLocale: () => set({ locale: "ar" }),
+      setLocale: (locale) => set({ locale }),
+      toggleLocale: () => {
+        const next = get().locale === "ar" ? "en" : "ar";
+        set({ locale: next });
+      },
       setThemeMode: (themeMode) => set({ themeMode }),
+      toggleThemeMode: () => {
+        const next = get().themeMode === "light" ? "dark" : "light";
+        set({ themeMode: next });
+      },
       setSeasonalTheme: (seasonalTheme) => set({ seasonalTheme }),
       setMaintenanceMode: (isMaintenanceMode) => set({ isMaintenanceMode }),
       toggleAdminPreview: () => set((state) => ({ isAdmin: !state.isAdmin })),
     }),
     {
-      name: "sancta-maria-app-settings",
+      name: "fg-collective-app-settings",
     }
   )
 );
