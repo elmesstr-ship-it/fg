@@ -1,0 +1,544 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./church_store.db"
+}
+
+// ----------------------------------------------------
+// 1. Users & Authentication
+// ----------------------------------------------------
+model User {
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  passwordHash            String
+  salt                    String
+  phone                   String    @unique
+  role                    String    @default("USER") // "USER" | "ADMIN"
+  isEmailVerified         Boolean   @default(false)
+  emailVerificationToken  String?
+  emailVerificationExpires DateTime?
+  isPhoneVerified         Boolean   @default(false)
+  phoneOtpCode            String?
+  phoneOtpExpires         DateTime?
+  passwordResetToken      String?
+  passwordResetExpires    DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  profile                 Profile?
+  addresses               Address[]
+  orders                  Order[]
+  reviews                 Review[]
+  wishlist                WishlistItem[]
+  cart                    Cart?
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+// ----------------------------------------------------
+// 2. Profiles
+// ----------------------------------------------------
+model Profile {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  fullName   String
+  avatarUrl  String?
+  parishName String?  // Church or Diocese affiliation
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ----------------------------------------------------
+// 3. Addresses
+// ----------------------------------------------------
+model Address {
+  id            String   @id @default(uuid())
+  userId        String?
+  title         String   @default("المنزل")
+  fullName      String
+  phone         String
+  governorate   String
+  city          String
+  streetAddress String
+  notes         String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// ----------------------------------------------------
+// 4. Categories
+// ----------------------------------------------------
+model Category {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  nameAr      String
+  nameEn      String
+  descAr      String
+  descEn      String
+  image       String
+  itemCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@index([slug])
+}
+
+// ----------------------------------------------------
+// 5. Products & Product Images
+// ----------------------------------------------------
+model Product {
+  id                 String         @id @default(uuid())
+  slug               String         @unique
+  nameAr             String
+  nameEn             String
+  shortDescAr        String
+  shortDescEn        String
+  fullDescAr         String
+  fullDescEn         String
+  categoryId         String
+  price              Float
+  originalPrice      Float?
+  discountPercentage Int?
+  stock              Int            @default(0)
+  sku                String         @unique
+  isFeatured         Boolean        @default(false)
+  isBestSeller       Boolean        @default(false)
+  rating             Float          @default(5.0)
+  reviewCount        Int            @default(0)
+  specificationsJson String         @default("{}") // JSON string of specifications
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  category           Category       @relation(fields: [categoryId], references: [id])
+  images             ProductImage[]
+  variants           ProductVariant[]
+  inventoryItem      Inventory?
+  reviews            Review[]
+  orderItems         OrderItem[]
+  wishlistItems      WishlistItem[]
+  cartItems          CartItem[]
+  alerts             ProductAlert[]
+
+  @@index([slug])
+  @@index([sku])
+  @@index([categoryId])
+  @@index([isFeatured])
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  productId String
+  sku       String   @unique
+  nameAr    String
+  nameEn    String
+  price     Float
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([sku])
+}
+
+// ----------------------------------------------------
+// 6. Inventory
+// ----------------------------------------------------
+model Inventory {
+  id                 String   @id @default(uuid())
+  productId          String   @unique
+  sku                String   @unique
+  currentStock       Int      @default(0)
+  lowStockThreshold  Int      @default(10)
+  safetyStock        Int      @default(2)
+  unitCost           Float    @default(0.0)
+  sellingPrice       Float    @default(0.0)
+  status             String   @default("in_stock") // "in_stock" | "low_stock" | "out_of_stock"
+  lastRestockedAt    DateTime @default(now())
+  lastUpdatedSource  String   @default("admin_dashboard") // "admin_dashboard" | "telegram_bot" | "order"
+  updatedAt          DateTime @updatedAt
+
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([sku])
+  @@index([status])
+}
+
+// ----------------------------------------------------
+// 7. Orders & Order Items
+// ----------------------------------------------------
+model Order {
+  id               String      @id @default(uuid())
+  orderNumber      String      @unique
+  userId           String?
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  governorate      String
+  city             String
+  streetAddress    String
+  notes            String?
+  subtotal         Float
+  shippingFee      Float       @default(0.0)
+  discountAmount   Float       @default(0.0)
+  total            Float
+  paymentMethod    String      // "cash_on_delivery" | "vodafone_cash" | "credit_card"
+  paymentStatus    String      @default("pending") // "pending" | "paid" | "failed" | "refunded"
+  orderStatus      String      @default("processing") // "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+  trackingNumber   String?
+  shippingProvider String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  user             User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items            OrderItem[]
+  shipment         Shipment?
+
+  @@index([orderNumber])
+  @@index([customerEmail])
+  @@index([orderStatus])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  productId    String
+  productName  String
+  productImage String
+  price        Float
+  quantity     Int      @default(1)
+  variantName  String?
+
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ----------------------------------------------------
+// 8. Carts & Cart Items
+// ----------------------------------------------------
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String?    @unique
+  sessionId String?    @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  cartId      String
+  productId   String
+  quantity    Int      @default(1)
+  variantName String?
+  createdAt   DateTime @default(now())
+
+  cart        Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+// ----------------------------------------------------
+// 9. Wishlists
+// ----------------------------------------------------
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ----------------------------------------------------
+// 10. Reviews
+// ----------------------------------------------------
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String?
+  userName  String
+  rating    Int      @default(5)
+  comment   String
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([rating])
+}
+
+// ----------------------------------------------------
+// 11. Coupons
+// ----------------------------------------------------
+model Coupon {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  discountType      String   // "percentage" | "fixed_amount"
+  discountValue     Float
+  minOrderAmount    Float?
+  maxDiscountAmount Float?
+  startDate         DateTime @default(now())
+  endDate           DateTime
+  isActive          Boolean  @default(true)
+  usageCount        Int      @default(0)
+  usageLimit        Int?
+  descAr            String
+  descEn            String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// ----------------------------------------------------
+// 12. Notifications
+// ----------------------------------------------------
+model Notification {
+  id           String   @id @default(uuid())
+  type         String   // "new_order" | "low_stock" | "telegram_activity" | "payment_confirmed"
+  priority     String   @default("medium") // "low" | "medium" | "high" | "urgent"
+  titleAr      String
+  titleEn      String
+  messageAr    String
+  messageEn    String
+  isRead       Boolean  @default(false)
+  resourceId   String?
+  resourceType String?  // "order" | "product" | "customer"
+  actionUrl    String?
+  createdAt    DateTime @default(now())
+
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ----------------------------------------------------
+// 13. Activity Logs (Audit Trail)
+// ----------------------------------------------------
+model ActivityLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  adminName String
+  action    String
+  resource  String
+  detailsAr String
+  detailsEn String
+  ipAddress String   @default("127.0.0.1")
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+// ----------------------------------------------------
+// 14. Themes & Theme Schedules
+// ----------------------------------------------------
+model Theme {
+  id               String          @id @default(uuid())
+  key              String          @unique // "default" | "halloween" | "christmas" | "easter" | custom slug
+  nameAr           String
+  nameEn           String
+  descAr           String
+  descEn           String
+  isActive         Boolean         @default(false)
+  isCustom         Boolean         @default(false)
+  priority         Int             @default(0) // Higher number = higher precedence during scheduling
+  bannerMessageAr  String?
+  bannerMessageEn  String?
+  lightColorsJson  String
+  darkColorsJson   String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  schedules        ThemeSchedule[]
+
+  @@index([key])
+  @@index([isActive])
+  @@index([priority])
+}
+
+model ThemeSchedule {
+  id          String   @id @default(uuid())
+  themeId     String
+  startDate   DateTime
+  endDate     DateTime
+  autoRevert  Boolean  @default(true)
+  status      String   @default("scheduled") // "scheduled" | "active" | "expired"
+  createdAt   DateTime @default(now())
+
+  theme       Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@index([themeId])
+  @@index([status])
+}
+
+// ----------------------------------------------------
+// 15. Website Settings (Key-Value JSON Store)
+// ----------------------------------------------------
+model StoreSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g. "general", "shipping", "telegram", "security"
+  valueJson String
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// 16. Authorized Telegram Users (Allowlist & RBAC)
+// ----------------------------------------------------
+model TelegramUser {
+  id          String   @id @default(uuid())
+  telegramId  String   @unique
+  username    String?
+  firstName   String?
+  role        String   @default("VIEWER") // "OWNER" | "ADMIN" | "VIEWER"
+  isActive    Boolean  @default(true)
+  addedBy     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([telegramId])
+  @@index([role])
+  @@index([isActive])
+}
+
+// ----------------------------------------------------
+// 17. Payment Transactions (Auditing & Status Tracking)
+// ----------------------------------------------------
+model PaymentTransaction {
+  id              String   @id @default(uuid())
+  orderId         String
+  providerKey     String   // "cod" | "card_paymob" | "vodafone_cash"
+  amount          Float
+  currency        String   @default("EGP")
+  status          String   @default("pending") // "pending" | "processing" | "paid" | "failed" | "cancelled" | "refunded"
+  providerTxId    String?  // Reference ID from Paymob/Vodafone
+  paymentDetails  String?  // JSON string of non-sensitive metadata (wallet sender phone, last4 digits, masked ref)
+  failureReason   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerTxId])
+  @@index([status])
+  @@index([providerKey])
+}
+
+// ----------------------------------------------------
+// 18. Shipments (Third-Party Egyptian Courier Delivery)
+// ----------------------------------------------------
+model Shipment {
+  id                String    @id @default(uuid())
+  orderId           String    @unique
+  trackingNumber    String    @unique
+  providerKey       String    @default("bosta") // "bosta" | "aramex" | "manual"
+  providerName      String    @default("Bosta Logistics")
+  status            String    @default("created") // "created" | "picked_up" | "in_transit" | "out_for_delivery" | "delivered" | "returned" | "cancelled"
+  shippingFee       Float
+  codAmount         Float     @default(0.0) // Cash to collect on delivery
+  governorate       String
+  city              String
+  streetAddress     String
+  recipientName     String
+  recipientPhone    String
+  estimatedDelivery DateTime?
+  checkpointsJson   String?   // JSON array of [{ timestamp, status, location, notes }]
+  courierNotes      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([trackingNumber])
+  @@index([orderId])
+  @@index([status])
+}
+
+// ----------------------------------------------------
+// 19. Product Stock Availability Alerts (Back in Stock)
+// ----------------------------------------------------
+model ProductAlert {
+  id          String    @id @default(uuid())
+  productId   String
+  email       String
+  phone       String?
+  notified    Boolean   @default(false)
+  notifiedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([email])
+  @@index([notified])
+}
+
+// ----------------------------------------------------
+// 20. Customer Support Inquiries
+// ----------------------------------------------------
+model SupportMessage {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  message     String
+  status      String   @default("open") // "open" | "replied" | "closed"
+  replyText   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+
+
+
+

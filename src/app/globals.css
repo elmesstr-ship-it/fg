@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --theme-primary: #F5A623;
+  --theme-primary-hover: #D98E18;
+  --theme-primary-contrast: #1C1917;
+  --theme-accent: #E59819;
+  --theme-accent-light: #FCD678;
+  --theme-accent-dark: #B8760C;
+  --theme-gold: #F5A623;
+  --theme-gold-light: #FEE79A;
+  --theme-gold-dark: #C98212;
+  --theme-bg: #FFFFFF;
+  --theme-surface: #FFFFFF;
+  --theme-surface-elevated: #FFFBF0;
+  --theme-border: #F0E8D5;
+  --theme-border-accent: #F5A623;
+  --theme-text: #1E2229;
+  --theme-text-muted: #6B7280;
+  --theme-text-subtle: #9CA3AF;
+  --theme-olive: #D98E18;
+  --theme-danger: #DC2626;
+  --theme-success: #16A34A;
+}
+
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: 'Alexandria', 'Inter', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: clip;
+  direction: rtl;
+}
+
+/* Sacred Headings */
+h1, h2, h3, .font-sacred {
+  font-family: 'Alexandria', 'Cinzel', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: 'Alexandria', 'Cinzel', sans-serif;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-surface-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-gold);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-gold-dark);
+}
+
+/* Liturgical Subtle Patterns */
+.bg-parchment {
+  background-color: var(--theme-bg);
+  background-image: radial-gradient(rgba(197, 160, 89, 0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.border-filigree {
+  border: 1px solid var(--theme-border);
+  position: relative;
+}
+
+.border-filigree::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  left: 2px;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  pointer-events: none;
+}

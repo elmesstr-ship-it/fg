@@ -1,0 +1,4 @@
+﻿node_modules
+.next
+.git
+church_store.db*
