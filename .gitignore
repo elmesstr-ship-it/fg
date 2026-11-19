@@ -3,3 +3,6 @@
 .git
 .env.local
 church_store.db*
+
+scratch/
+tsconfig.tsbuildinfo
