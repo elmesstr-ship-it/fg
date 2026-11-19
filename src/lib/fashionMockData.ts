@@ -148,8 +148,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "الأكثر طلباً 🔥", en: "BESTSELLER 🔥", type: "black" },
     images: [
       "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -202,8 +201,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "إصدار حصري 👑", en: "EXCLUSIVE 👑", type: "gold" },
     images: [
       "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1548883354-7622d03aca27?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -254,7 +252,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "دروب جديد 🔥", en: "NEW DROP 🔥", type: "crimson" },
     images: [
       "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["M", "L", "XL", "XXL"],
     colors: [
@@ -303,7 +301,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 24,
     images: [
       "https://images.unsplash.com/photo-1548883354-7622d03aca27?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -350,8 +348,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.89,
     reviewCount: 22,
     images: [
-      "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -399,8 +397,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 39,
     badge: { ar: "قطعة الموسم 👑", en: "GRAIL PIECE 👑", type: "gold" },
     images: [
+      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1200&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1548883354-7622d03aca27?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["M", "L", "XL", "XXL"],
     colors: [
@@ -454,7 +452,6 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "الأكثر طلباً 🔥", en: "BESTSELLER 🔥", type: "black" },
     images: [
       "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=1200&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
@@ -508,7 +505,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "دروب جديد 🔥", en: "NEW DROP 🔥", type: "crimson" },
     images: [
       "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1503342394128-c104d54dba01?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -557,8 +554,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 29,
     badge: { ar: "إصدار حصري 👑", en: "EXCLUSIVE 👑", type: "gold" },
     images: [
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1554568218-0f1715e72254?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -606,8 +603,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.82,
     reviewCount: 16,
     images: [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1618354691438-25bc04584c23?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["M", "L", "XL", "XXL"],
     colors: [
@@ -654,8 +651,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.9,
     reviewCount: 42,
     images: [
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -708,7 +705,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "الأكثر طلباً 🔥", en: "BESTSELLER 🔥", type: "black" },
     images: [
       "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S (30)", "M (32)", "L (34)", "XL (36)"],
     colors: [
@@ -759,7 +756,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 28,
     images: [
       "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -809,8 +806,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 22,
     badge: { ar: "إصدار حصري 👑", en: "EXCLUSIVE 👑", type: "gold" },
     images: [
+      "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?q=80&w=1200&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["30", "32", "34", "36"],
     colors: [
@@ -857,8 +854,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.81,
     reviewCount: 17,
     images: [
+      "https://images.unsplash.com/photo-1551854838-212c50b4c184?q=80&w=1200&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -905,8 +902,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.89,
     reviewCount: 25,
     images: [
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["30", "32", "34", "36"],
     colors: [
@@ -958,8 +955,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 36,
     badge: { ar: "قطعة الموسم 👑", en: "GRAIL PIECE 👑", type: "gold" },
     images: [
-      "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["M", "L", "XL"],
     colors: [
@@ -1060,7 +1057,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 20,
     images: [
       "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["M", "L", "XL", "XXL"],
     colors: [
@@ -1107,8 +1104,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.84,
     reviewCount: 15,
     images: [
+      "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=1200&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["S", "M", "L", "XL"],
     colors: [
@@ -1161,7 +1158,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "الأكثر طلباً 🔥", en: "BESTSELLER 🔥", type: "black" },
     images: [
       "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1572495532056-85e3a4965520?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1521369909029-2afed882baee?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["One Size"],
     colors: [
@@ -1214,7 +1211,7 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     badge: { ar: "دروب جديد 🔥", en: "NEW DROP 🔥", type: "crimson" },
     images: [
       "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["One Size (22 x 16 x 6 cm)"],
     colors: [
@@ -1262,8 +1259,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     rating: 4.88,
     reviewCount: 30,
     images: [
-      "https://images.unsplash.com/photo-1572495532056-85e3a4965520?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["One Size"],
     colors: [
@@ -1312,8 +1309,8 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     reviewCount: 45,
     badge: { ar: "إصدار حصري 👑", en: "EXCLUSIVE 👑", type: "gold" },
     images: [
-      "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?q=80&w=1200&auto=format&fit=crop",
     ],
     sizes: ["55 cm"],
     colors: [
@@ -1322,7 +1319,6 @@ export const MOCK_PRODUCTS: MockProduct[] = [
     ],
     collectionSlug: "drop-01-monochrome",
     dropStatus: "available",
-    isFeatured: true,
     variants: [],
   },
 ];
