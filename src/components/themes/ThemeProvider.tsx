@@ -2,36 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { useSeasonalVisualStore, SeasonalVisualMode } from "@/store/seasonalVisualStore";
 import { SEASONAL_THEMES } from "@/config/themes";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const { locale, themeMode, seasonalTheme, setSeasonalTheme } = useAppStore();
-  const [dynamicThemes, setDynamicThemes] = useState<Record<string, any>>({});
+  const { locale, themeMode, seasonalTheme } = useAppStore();
+  const { setMode } = useSeasonalVisualStore();
 
   useEffect(() => {
     setMounted(true);
-    // Fetch server themes and schedules
-    fetch("/api/themes")
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.success && Array.isArray(res.data)) {
-          const map: Record<string, any> = {};
-          for (const t of res.data) {
-            map[t.key] = {
-              id: t.key,
-              name: t.name,
-              light: t.lightColors,
-              dark: t.darkColors,
-            };
-          }
-          setDynamicThemes(map);
-          if (res.activeThemeKey && res.activeThemeKey !== seasonalTheme) {
-            setSeasonalTheme(res.activeThemeKey);
-          }
-        }
-      })
-      .catch(() => {});
+    if (seasonalTheme) {
+      setMode(seasonalTheme as SeasonalVisualMode);
+    }
   }, []);
 
   useEffect(() => {
@@ -50,15 +33,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove("dark");
     }
 
-    // Apply Seasonal Theme CSS Variables (checks dynamic database theme first, then static config)
-    const currentTheme =
-      dynamicThemes[seasonalTheme] ||
-      SEASONAL_THEMES[seasonalTheme] ||
-      dynamicThemes["default"] ||
-      SEASONAL_THEMES.default;
+    // Resolve current theme palette
+    const themeDef = SEASONAL_THEMES[seasonalTheme] || SEASONAL_THEMES.default;
+    const colors = themeMode === "dark" ? themeDef.dark : themeDef.light;
 
-    const colors = themeMode === "dark" ? currentTheme.dark : currentTheme.light;
-
+    // Set CSS variables on :root
     root.style.setProperty("--theme-primary", colors.primary);
     root.style.setProperty("--theme-primary-hover", colors.primaryHover);
     root.style.setProperty("--theme-primary-contrast", colors.primaryContrast);
@@ -74,8 +53,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty("--theme-text-muted", colors.textMuted);
     root.style.setProperty("--theme-danger", "#D32F2F");
     root.style.setProperty("--theme-success", "#2E7D32");
+
+    // Set HTML data attributes for CSS targeting
+    root.setAttribute("data-seasonal-theme", seasonalTheme);
+    root.setAttribute("data-theme-mode", themeMode);
+
+    // Apply smooth background & text color transitions to body
+    if (document.body) {
+      document.body.style.backgroundColor = colors.bg;
+      document.body.style.color = colors.text;
+    }
+
+    // Always keep visual particle canvas in sync
+    setMode(seasonalTheme as SeasonalVisualMode);
   }, [mounted, locale, themeMode, seasonalTheme]);
 
-  // Render children cleanly
   return <>{children}</>;
 }

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { MOCK_CATEGORIES, MOCK_PRODUCTS } from "../src/lib/fashionMockData";
+import { SEASONAL_THEMES } from "../src/config/themes";
 
 const prisma = new PrismaClient();
 
@@ -278,33 +279,24 @@ async function main() {
     },
   });
 
-  // 7. Seed Themes (Strictly Fashion Themes - Zero Halloween)
-  console.log("Seeding Themes...");
-  await prisma.theme.create({
-    data: {
-      key: "default",
-      nameAr: "السمة الأحادية الفاخرة (الافتراضية)",
-      nameEn: "FG Monochrome (Default)",
-      descAr: "سمة ستريت وير معاصرة بباليت أحادي مونوكروم ولمسات فضية حادة",
-      descEn: "Contemporary streetwear theme with minimalist monochrome palette and razor silver accents",
-      isActive: true,
-      lightColorsJson: JSON.stringify({ primary: "#0A0A0A", accent: "#52525B", bg: "#FAFAFA" }),
-      darkColorsJson: JSON.stringify({ primary: "#FFFFFF", accent: "#A1A1AA", bg: "#09090B" }),
-    },
-  });
-
-  await prisma.theme.create({
-    data: {
-      key: "summer",
-      nameAr: "إصدار الصيف البحري",
-      nameEn: "Summer Coast Drop",
-      descAr: "أزرق المحيط وألوان منعشة للأطقم الخفيفة",
-      descEn: "Ocean azure and refreshing breezes for lightweight summer drops",
-      isActive: false,
-      lightColorsJson: JSON.stringify({ primary: "#0284C7", accent: "#38BDF8", bg: "#F8FAFC" }),
-      darkColorsJson: JSON.stringify({ primary: "#38BDF8", accent: "#7DD3FC", bg: "#0B132B" }),
-    },
-  });
+  // 7. Seed Themes (All 7 Fashion Themes - Zero Halloween)
+  console.log("Seeding All Fashion Themes...");
+  for (const t of Object.values(SEASONAL_THEMES)) {
+    await prisma.theme.create({
+      data: {
+        key: t.id,
+        nameAr: t.name.ar,
+        nameEn: t.name.en,
+        descAr: t.description.ar,
+        descEn: t.description.en,
+        isActive: t.id === "default",
+        bannerMessageAr: t.bannerMessage?.ar,
+        bannerMessageEn: t.bannerMessage?.en,
+        lightColorsJson: JSON.stringify(t.light),
+        darkColorsJson: JSON.stringify(t.dark),
+      },
+    });
+  }
 
   console.log("✅ FG Collective Fashion Database Seeded Successfully!");
 }

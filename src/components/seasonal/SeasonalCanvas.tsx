@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useSeasonalVisualStore } from "@/store/seasonalVisualStore";
+import { useAppStore } from "@/store/useAppStore";
 
 interface Particle {
   x: number;
@@ -18,7 +19,9 @@ interface Particle {
 
 export function SeasonalCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { currentMode, festiveSubMode } = useSeasonalVisualStore();
+  const { festiveSubMode } = useSeasonalVisualStore();
+  const { seasonalTheme } = useAppStore();
+  const currentMode = seasonalTheme || "default";
 
   useEffect(() => {
     const canvas = canvasRef.current;

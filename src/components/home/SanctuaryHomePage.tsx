@@ -21,13 +21,17 @@ import { SanctuaryProductCard } from "@/components/products/SanctuaryProductCard
 import { useSeasonalVisualStore } from "@/store/seasonalVisualStore";
 import { useAppStore } from "@/store/useAppStore";
 import { Footer } from "@/components/layout/Footer";
+import { SEASONAL_THEMES } from "@/config/themes";
 
 export function SanctuaryHomePage() {
   const { currentMode } = useSeasonalVisualStore();
-  const { locale } = useAppStore();
+  const { locale, themeMode, seasonalTheme } = useAppStore();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [emailInput, setEmailInput] = useState("");
   const [subscribedToast, setSubscribedToast] = useState(false);
+
+  const activeTheme = SEASONAL_THEMES[seasonalTheme] || SEASONAL_THEMES.default;
+  const colors = themeMode === "dark" ? activeTheme.dark : activeTheme.light;
 
   // Live countdown timer state for next drop
   const [timeLeft, setTimeLeft] = useState({ days: 4, hours: 18, minutes: 32, seconds: 45 });
@@ -63,17 +67,32 @@ export function SanctuaryHomePage() {
       {/* ---------------------------------------------------- */}
       {/* 1. HERO STREETWEAR EDITORIAL SECTION                */}
       {/* ---------------------------------------------------- */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-neutral-100 via-neutral-50 to-white dark:from-neutral-950 dark:via-black dark:to-[#0A0A0A] pt-6 pb-16 lg:pt-14 lg:pb-24 border-b border-neutral-200 dark:border-neutral-800">
+      <section className="relative overflow-hidden pt-6 pb-16 lg:pt-14 lg:pb-24 border-b border-neutral-200 dark:border-neutral-800 transition-colors duration-500">
+        {/* Dynamic Seasonal Atmosphere Glow */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-25 transition-all duration-700 blur-3xl"
+          style={{
+            background: `radial-gradient(ellipse 80% 60% at 50% -20%, ${colors.primary} 0%, transparent 70%)`,
+          }}
+        />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Editorial Copy */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-right">
               {/* Drop Status Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black dark:bg-white text-white dark:text-black shadow-md">
-                <Flame className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full shadow-md border transition-all duration-300"
+                style={{
+                  backgroundColor: themeMode === "dark" ? "#141416" : "#FFFFFF",
+                  borderColor: colors.primary,
+                  color: colors.text,
+                }}
+              >
+                <Flame className="w-3.5 h-3.5" style={{ color: colors.gold }} />
                 <span className="text-xs font-black tracking-widest uppercase font-mono">
-                  {locale === "ar" ? "دروب 01 متاح الآن • كميات محدودة" : "DROP 01 LIVE • LIMITED EDITION"}
+                  {locale === "ar" ? activeTheme.name.ar : activeTheme.name.en}
                 </span>
               </div>
 
@@ -82,14 +101,14 @@ export function SanctuaryHomePage() {
                 {locale === "ar" ? (
                   <>
                     أزياء ستريت وير معاصرة <br />
-                    <span className="text-[#D4AF37] relative inline-block">
+                    <span className="relative inline-block" style={{ color: colors.gold }}>
                       بخامات قطن مصري 380 GSM
                     </span>
                   </>
                 ) : (
                   <>
                     CONTEMPORARY LUXURY <br />
-                    <span className="text-[#D4AF37] relative inline-block">
+                    <span className="relative inline-block" style={{ color: colors.gold }}>
                       380 GSM HEAVYWEIGHT FITS
                     </span>
                   </>
@@ -107,10 +126,10 @@ export function SanctuaryHomePage() {
               <div className="p-4 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 max-w-md mx-auto lg:mx-0">
                 <div className="flex items-center justify-between text-xs font-mono font-bold uppercase text-neutral-500 mb-2">
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    {locale === "ar" ? "موعد إطلاق دروب 02 (Summer Heatwave)" : "DROP 02 COUNTDOWN"}
+                    <Clock className="w-3.5 h-3.5" style={{ color: colors.gold }} />
+                    {locale === "ar" ? "موعد إطلاق دروب 02 القادم" : "NEXT DROP COUNTDOWN"}
                   </span>
-                  <span className="text-[#D4AF37]">LIVE TIMER</span>
+                  <span style={{ color: colors.gold }}>LIVE TIMER</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="p-2 rounded-lg bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800">
@@ -136,7 +155,11 @@ export function SanctuaryHomePage() {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                 <Link
                   href="/catalog"
-                  className="px-8 py-3.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold shadow-lg hover:opacity-90 flex items-center gap-2.5 transition-all group"
+                  className="px-8 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:opacity-90 flex items-center gap-2.5 transition-all group"
+                  style={{
+                    backgroundColor: colors.primary,
+                    color: colors.primaryContrast,
+                  }}
                 >
                   <span>{locale === "ar" ? "تسوق أحدث الإصدارات" : "Shop All Drops"}</span>
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

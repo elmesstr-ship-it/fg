@@ -72,18 +72,32 @@ export function SanctuaryNavbar() {
     { id: "christmas", labelAr: "إصدار رأس السنة والميلاد", labelEn: "Holiday Drop", color: "#881337" },
   ];
 
+  const activeTheme = SEASONAL_THEMES[seasonalTheme] || SEASONAL_THEMES.default;
+  const currentColors = mounted && themeMode === "dark" ? activeTheme.dark : activeTheme.light;
+  const bannerText = activeTheme.bannerMessage
+    ? (locale === "ar" ? activeTheme.bannerMessage.ar : activeTheme.bannerMessage.en)
+    : (locale === "ar" ? "شحن مجاني لكافة محافظات مصر للطلبات فوق 1500 ج.م • كود خصم FG10" : "Free Shipping across Egypt on orders over 1500 EGP • Use code FG10");
+
   return (
     <>
       {/* 1. TOP ANNOUNCEMENT BAR */}
-      <div className="relative z-50 bg-[#0A0A0A] text-[#FAFAFA] text-[12px] py-2 px-4 border-b border-neutral-800 transition-colors duration-300">
+      <div
+        className="relative z-50 text-[12px] py-2 px-4 border-b transition-colors duration-300"
+        style={{
+          backgroundColor: mounted && themeMode === "dark" ? "#0F0F12" : "#18181B",
+          borderColor: currentColors.primary,
+          color: "#FAFAFA",
+        }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Announcement Message */}
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-ping" />
-            <p className="font-sans font-medium tracking-wide text-neutral-300">
-              {locale === "ar"
-                ? "شحن مجاني لكافة محافظات مصر للطلبات فوق 1500 ج.م • كود خصم FG10"
-                : "Free Shipping across Egypt on orders over 1500 EGP • Use code FG10"}
+            <span
+              className="w-2 h-2 rounded-full animate-ping"
+              style={{ backgroundColor: currentColors.gold }}
+            />
+            <p className="font-sans font-medium tracking-wide text-neutral-200">
+              {bannerText}
             </p>
           </div>
 
@@ -93,11 +107,16 @@ export function SanctuaryNavbar() {
             <div className="relative hidden sm:block">
               <button
                 onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 transition-all text-[11px]"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] transition-all font-medium"
+                style={{
+                  backgroundColor: mounted && themeMode === "dark" ? "#18181B" : "#27272A",
+                  borderColor: currentColors.primary,
+                  color: "#FFFFFF",
+                }}
               >
-                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                <Sparkles className="w-3 h-3" style={{ color: currentColors.gold }} />
                 <span>
-                  {seasonalOptions.find((o) => o.id === currentMode)?.[
+                  {seasonalOptions.find((o) => o.id === seasonalTheme)?.[
                     locale === "ar" ? "labelAr" : "labelEn"
                   ] || "FG Monochrome"}
                 </span>
@@ -105,7 +124,7 @@ export function SanctuaryNavbar() {
               </button>
 
               {isThemeMenuOpen && (
-                <div className="absolute left-0 mt-2 w-60 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-200 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute left-0 mt-2 w-64 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-200 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 py-1.5 border-b border-neutral-800">
                     {locale === "ar" ? "اختر الطابع الموسمي" : "Select Seasonal Drop"}
                   </div>
@@ -114,14 +133,17 @@ export function SanctuaryNavbar() {
                       key={opt.id}
                       onClick={() => handleSelectSeasonalTheme(opt.id)}
                       className={`w-full text-right px-3 py-2 text-xs rounded-lg flex items-center justify-between hover:bg-neutral-900 transition-colors ${
-                        currentMode === opt.id ? "bg-neutral-900 text-[#D4AF37] font-bold" : ""
+                        seasonalTheme === opt.id ? "bg-neutral-900 font-bold" : ""
                       }`}
+                      style={{
+                        color: seasonalTheme === opt.id ? currentColors.gold : undefined,
+                      }}
                     >
                       <span className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: opt.color }} />
+                        <span className="w-3 h-3 rounded-full border border-neutral-600 shadow-sm" style={{ backgroundColor: opt.color }} />
                         {locale === "ar" ? opt.labelAr : opt.labelEn}
                       </span>
-                      {currentMode === opt.id && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                      {seasonalTheme === opt.id && <Check className="w-3.5 h-3.5" style={{ color: currentColors.gold }} />}
                     </button>
                   ))}
                 </div>
@@ -422,6 +444,32 @@ export function SanctuaryNavbar() {
                     {mounted && themeMode === "dark" ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
                     <span>{themeMode === "dark" ? "الوضع الليلي" : "الوضع النهاري"}</span>
                   </button>
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-neutral-100 dark:border-neutral-900">
+                  <span className="text-xs text-neutral-500 block font-bold">الطابع الموسمي / Drop Theme</span>
+                  <div className="space-y-1">
+                    {seasonalOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => {
+                          handleSelectSeasonalTheme(opt.id);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`w-full text-right px-2.5 py-1.5 text-xs rounded-lg flex items-center justify-between border transition-all ${
+                          seasonalTheme === opt.id
+                            ? "border-neutral-400 bg-neutral-100 dark:bg-neutral-800 font-bold"
+                            : "border-transparent hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: opt.color }} />
+                          {locale === "ar" ? opt.labelAr : opt.labelEn}
+                        </span>
+                        {seasonalTheme === opt.id && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

@@ -23,10 +23,27 @@ export default function AdminThemesPage() {
 
   const themeList = Object.values(SEASONAL_THEMES);
 
-  const handleApplyTheme = (id: string) => {
-    setSeasonalTheme(id);
+  const handleApplyTheme = async (id: string) => {
+    setSeasonalTheme(id as any);
     setMode(id as SeasonalVisualMode);
     setActiveSuccess(id);
+
+    try {
+      await fetch("/api/themes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-master-key": "FGCollectiveMasterKey#2026",
+        },
+        body: JSON.stringify({
+          action: "activate",
+          themeKey: id,
+        }),
+      });
+    } catch (e) {
+      console.warn("Theme activation sync:", e);
+    }
+
     setTimeout(() => setActiveSuccess(null), 3000);
   };
 

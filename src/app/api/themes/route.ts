@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
           adminName: "Administrator",
           action: "THEME_ACTIVATED",
           resource: themeKey,
-          detailsAr: `تم تفعيل المظهر الكنسي: ${themeKey}`,
+          detailsAr: `تم تفعيل طابع العلامة التجارية: ${themeKey}`,
           detailsEn: `Activated brand theme: ${themeKey}`,
           ipAddress: "127.0.0.1",
         },
