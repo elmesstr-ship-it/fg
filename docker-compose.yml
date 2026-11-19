@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fg_collective_web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fg_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: fg_collective_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fg_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMeSecurePassword2026}
+      POSTGRES_DB: ${POSTGRES_DB:-fg_store_prod}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/backup:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fg_admin} -d ${POSTGRES_DB:-fg_store_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fg_network
+
+  backup:
+    image: postgres:16-alpine
+    container_name: fg_db_backup
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./scripts/backup:/backups
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-fg_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMeSecurePassword2026}
+      POSTGRES_DB: ${POSTGRES_DB:-fg_store_prod}
+    entrypoint: |
+      sh -c '
+        while true; do
+          DATE=$$(date +%Y%m%d_%H%M%S)
+          echo "[BACKUP] Starting automated database backup at $$DATE..."
+          PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h $$POSTGRES_HOST -U $$POSTGRES_USER -d $$POSTGRES_DB -F c -b -v -f /backups/fg_$$DATE.dump
+          echo "[BACKUP] Done. Purging dumps older than 14 days..."
+          find /backups -type f -name "*.dump" -mtime +14 -exec rm {} \;
+          sleep 86400
+        done
+      '
+    networks:
+      - fg_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  fg_network:
+    driver: bridge
