@@ -78,7 +78,7 @@ export default function SupportPage() {
             <MapPin className="w-5 h-5" />
           </div>
           <h3 className="text-xs font-bold uppercase">المقر الرئيسي</h3>
-          <p className="text-[11px] text-neutral-500">القاهرة الجديدة، مصر</p>
+          <p className="text-[11px] text-neutral-500">المنصورة، محافظة الدقهلية، مصر</p>
         </div>
       </div>
 

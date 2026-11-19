@@ -62,7 +62,7 @@ export default function AuthLayout({
 
       {/* Footer */}
       <div className="text-center text-[11px] text-neutral-400 py-4 font-mono">
-        © {new Date().getFullYear()} FG Collective Cairo. Contemporary Luxury Streetwear.
+        © {new Date().getFullYear()} FG Collective Mansoura. Contemporary Luxury Streetwear.
       </div>
     </div>
   );

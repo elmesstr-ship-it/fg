@@ -9,10 +9,10 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen relative selection:bg-[#c5a059]/30 selection:text-[#781d22]">
+    <div className="flex flex-col min-h-screen relative selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
       <SeasonalCanvas />
       <SanctuaryNavbar />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-20 lg:pb-0">{children}</main>
       <SanctuaryMobileBottomBar />
     </div>
   );

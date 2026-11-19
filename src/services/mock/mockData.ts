@@ -412,7 +412,7 @@ export const MOCK_REVIEWS: ProductReview[] = [
     userId: "usr-cust-03",
     userName: "ياسين المنشاوي",
     rating: 5,
-    comment: "الكارجو بجد تفاصيله تحفة، الجيوب وسحاباتها ممتازة واستلمت في خلال 24 ساعة في القاهرة.",
+    comment: "الكارجو بجد تفاصيله تحفة، الجيوب وسحاباتها ممتازة واستلمت في خلال 24 ساعة في المنصورة.",
     createdAt: "2026-10-20T18:00:00Z",
   },
 ];
@@ -434,9 +434,9 @@ export const MOCK_CUSTOMERS: Customer[] = [
         title: "المنزل",
         fullName: "عمر الشريف",
         phone: "01012345678",
-        governorate: "القاهرة",
-        city: "التجمع الخامس",
-        streetAddress: "شارع التسعين الجنوبي، كمبوند ماونتن فيو، عمارة 12",
+        governorate: "الدقهلية",
+        city: "المنصورة",
+        streetAddress: "شارع الجمهورية، حي الجامعة، المنصورة",
         isDefault: true,
       },
     ],
@@ -508,9 +508,9 @@ export const MOCK_ORDERS: Order[] = [
     shippingAddress: {
       fullName: "عمر الشريف",
       phone: "01012345678",
-      governorate: "القاهرة",
-      city: "التجمع الخامس",
-      streetAddress: "شارع التسعين الجنوبي، كمبوند ماونتن فيو، عمارة 12",
+      governorate: "الدقهلية",
+      city: "المنصورة",
+      streetAddress: "شارع الجمهورية، حي الجامعة، المنصورة",
     },
     items: [
       {

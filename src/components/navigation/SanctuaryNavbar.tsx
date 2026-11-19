@@ -197,7 +197,7 @@ export function SanctuaryNavbar() {
                   FG COLLECTIVE
                 </span>
                 <span className="text-[9px] tracking-widest text-neutral-500 uppercase -mt-1 font-mono">
-                  CAIRO • EST. 2026
+                  MANSOURA • EST. 2026
                 </span>
               </div>
             </Link>

@@ -57,7 +57,7 @@ export function Footer() {
                   {locale === "ar" ? "شحن سريع لكافة المحافظات" : "Fast Nationwide Shipping"}
                 </h4>
                 <p className="text-[11px] text-neutral-500">
-                  {locale === "ar" ? "توصيل خلال 24-48 ساعة داخل القاهرة والجيزة" : "24-48h express delivery in Cairo & Giza"}
+                  {locale === "ar" ? "توصيل سريع داخل المنصورة وكافة محافظات مصر" : "Express delivery in Mansoura & across Egypt"}
                 </p>
               </div>
             </div>
@@ -246,7 +246,7 @@ export function Footer() {
             <ul className="space-y-2 text-xs text-neutral-500">
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-neutral-400 flex-shrink-0" />
-                <span>{locale === "ar" ? "القاهرة الجديدة، التجمع الخامس، مصر" : "New Cairo, Egypt"}</span>
+                <span>{locale === "ar" ? "المنصورة، محافظة الدقهلية، مصر" : "Mansoura, Dakahlia, Egypt"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-neutral-400 flex-shrink-0" />

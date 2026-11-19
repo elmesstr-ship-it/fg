@@ -1,4 +1,5 @@
 ﻿node_modules
 .next
 .git
+.env.local
 church_store.db*

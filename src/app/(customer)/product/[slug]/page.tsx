@@ -393,7 +393,7 @@ export default function ProductDetailPage({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-neutral-500 font-mono">MANUFACTURE</span>
-              <span className="font-bold text-neutral-900 dark:text-white">Crafted in Cairo, Egypt</span>
+              <span className="font-bold text-neutral-900 dark:text-white">Crafted in Mansoura, Egypt</span>
             </div>
           </div>
 

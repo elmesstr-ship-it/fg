@@ -35,9 +35,9 @@ export default function CheckoutPage() {
     fullName: user?.fullName || "عمر الشريف",
     phone: user?.phone || "01012345678",
     email: user?.email || "demo.user@example.com",
-    governorate: "القاهرة",
-    city: "التجمع الخامس",
-    streetAddress: "شارع التسعين الجنوبي، كمبوند ماونتن فيو، عمارة 12",
+    governorate: "الدقهلية",
+    city: "المنصورة",
+    streetAddress: "شارع الجمهورية، حي الجامعة، المنصورة",
     notes: "يرجى الاتصال قبل الوصول للتسليم",
   });
 

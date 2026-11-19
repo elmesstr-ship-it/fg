@@ -318,7 +318,7 @@ export default function OrderHistoryPage() {
             </div>
 
             <div className="pt-2 text-center text-[10px] text-neutral-400 font-mono">
-              FG Collective Cairo • Crafted with Pride in Egypt
+              FG Collective Mansoura • Crafted with Pride in Egypt
             </div>
           </div>
         </div>

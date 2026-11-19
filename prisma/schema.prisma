@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./church_store.db"
+  url      = "file:./fg_store.db"
 }
 
 // ----------------------------------------------------

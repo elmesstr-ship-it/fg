@@ -30,9 +30,9 @@ export default function CustomerProfilePage() {
     fullName: user?.fullName || "عمر الشريف",
     email: user?.email || "demo.user@example.com",
     phone: user?.phone || "01012345678",
-    governorate: "القاهرة",
-    city: "التجمع الخامس",
-    streetAddress: "شارع التسعين الجنوبي، كمبوند ماونتن فيو، عمارة 12",
+    governorate: "الدقهلية",
+    city: "المنصورة",
+    streetAddress: "شارع الجمهورية، حي الجامعة، المنصورة",
   });
 
   // Change Password Modal
