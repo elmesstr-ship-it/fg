@@ -357,8 +357,8 @@ export function Header() {
             <Link href="/categories" className="hover:text-theme-primary transition-colors">
               {t.navigation.categories}
             </Link>
-            <Link href="/catalog?cat=sacred-icons" className="hover:text-theme-primary transition-colors">
-              {t.navigation.icons}
+            <Link href="/catalog?drop=new" className="hover:text-theme-primary transition-colors">
+              {t.navigation.newDrops}
             </Link>
             <Link href="/catalog?category=hoodies-sweats" className="hover:text-theme-primary transition-colors">
               هوديز

@@ -45,13 +45,6 @@ export interface TranslationDictionary {
     lookbook: string;
     aboutUs: string;
     contact: string;
-    // Optional legacy fallback keys to avoid build breaks
-    icons?: string;
-    vestments?: string;
-    incenseAndBurners?: string;
-    altarSupplies?: string;
-    candles?: string;
-    booksAndGifts?: string;
   };
   admin: {
     dashboard: string;

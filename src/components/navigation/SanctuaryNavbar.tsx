@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Sparkles,
   Sun,
@@ -27,6 +28,8 @@ import { translations } from "@/config/i18n";
 import { SEASONAL_THEMES } from "@/config/themes";
 
 export function SanctuaryNavbar() {
+  const router = useRouter();
+  const pathname = usePathname();
   const { currentMode, setMode } = useSeasonalVisualStore();
   const { locale, toggleLocale, themeMode, toggleThemeMode, seasonalTheme, setSeasonalTheme } = useAppStore();
   const t = translations[locale];
@@ -378,7 +381,8 @@ export function SanctuaryNavbar() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (searchQuery.trim()) {
-                    window.location.href = `/catalog?search=${encodeURIComponent(searchQuery)}`;
+                    router.push(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setIsSearchOpen(false);
                   }
                 }}
                 className="relative"
